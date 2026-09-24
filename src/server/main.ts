@@ -9,7 +9,7 @@ const port = Number(process.env.PORT ?? 3000);
 const root = process.env.STATIC_ROOT ?? `${process.cwd()}/out`;
 
 const server = Bun.serve({ port, hostname: process.env.HOST ?? "0.0.0.0", fetch: createHandler({ root, logger }) });
-logger.info("server.started", { port: server.port, root, level: parseLevel(process.env.LOG_LEVEL) });
+logger.info("server.started", { port: server.port, root, log_level: parseLevel(process.env.LOG_LEVEL) });
 
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.on(signal, () => {

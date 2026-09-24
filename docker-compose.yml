@@ -1,0 +1,17 @@
+services:
+  web:
+    build: .
+    image: rentability:latest
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PORT: 3000
+    ports:
+      # Loopback only: reach it over the SSH tunnel, never on the public address.
+      - "127.0.0.1:${WEB_PORT:?set WEB_PORT, e.g. WEB_PORT=$(freeport)}:3000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
