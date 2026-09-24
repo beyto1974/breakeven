@@ -120,7 +120,7 @@ ul.plain{margin:0;padding-left:18px;display:grid;gap:6px;max-width:70ch}
     <p>This is the reference simulator's arithmetic with a generic vocabulary: a <em>customer</em> buys <em>units</em>, and both nouns can be renamed through the URL. Two optional revenue and cost lines are added: a flat subscription per customer, and an acquisition cost per new customer. All money is held as integer cents. Prices include VAT, so VAT is taken out of revenue and never out of costs.</p>
 <pre><span class="c">// per month m = 1..months</span>
 units        = round(customers × unitsPerCustomer)
-revenue      = units × net(price) + round(customers) × net(subscription)
+revenue      = net(units × price + round(customers) × subscription)   <span class="c">// VAT on the month, not per unit</span>
 variableCost = units × variable
 acquisition  = newCustomers(m) × cac          <span class="c">// month 1 buys no one</span>
 margin       = revenue − variableCost − acquisition − fixed
@@ -128,7 +128,7 @@ cumulative  += margin
 customers    = customers × (1 − churn%) + growth   <span class="c">// kept fractional, rounded for display</span>
 
 net(gross)          = floor(gross / (1 + vat%))
-contribution        = unitsPerCustomer × (net(price) − variable) + net(subscription)
+contribution        = unitsPerCustomer × (price ÷ (1 + vat%) − variable) + subscription ÷ (1 + vat%)
 breakEvenCustomers  = contribution ≤ 0 ? never : ceil(fixed / contribution)
 breakEvenMonth      = first m with margin ≥ 0
 paybackMonth        = first m ≥ breakEvenMonth with cumulative ≥ 0
@@ -189,12 +189,12 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
         <span style="border:0">Copy link · JSON · CSV · reset</span>
       </div>
       <div class="main">
-        <div class="box" style="color:var(--ink);font:600 16px/1.4 var(--display)">Break-even at 34 customers · month 9 · paid back in month 16</div>
+        <div class="box" style="color:var(--ink);font:600 16px/1.4 var(--display)">Break-even at 32 customers · month 8 · paid back in month 15</div>
         <div class="kpis">
-          <div class="box">threshold<b>34</b></div>
-          <div class="box">first profitable<b>M9</b></div>
-          <div class="box">margin, 24 m<b>€ 1 239</b></div>
-          <div class="box">margin rate<b>15 %</b></div>
+          <div class="box">threshold<b>32</b></div>
+          <div class="box">first profitable<b>M8</b></div>
+          <div class="box">margin, 24 m<b>€ 1 505</b></div>
+          <div class="box">margin rate<b>18 %</b></div>
         </div>
         <div class="box" style="min-height:120px">Chart · stacked cost bars, revenue line, cumulative margin area, zero line, markers</div>
         <div class="box" style="min-height:90px">Sensitivity · price × units per customer heatmap of break-even customers (±50 %, 7 × 7)</div>
@@ -217,7 +217,7 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
     <div class="panel types">
       <div><small>display</small><span style="font:700 28px/1.1 var(--display)">Bricolage Grotesque</span></div>
       <div><small>body</small><span style="font:400 17px/1.4 var(--body)">Instrument Sans for labels and prose</span></div>
-      <div style="border:0;padding:0"><small>figures</small><span style="font:500 17px/1.4 var(--mono);font-variant-numeric:tabular-nums">JetBrains Mono · € 1 239,15</span></div>
+      <div style="border:0;padding:0"><small>figures</small><span style="font:500 17px/1.4 var(--mono);font-variant-numeric:tabular-nums">JetBrains Mono · € 1 505,22</span></div>
     </div>
   </section>
 
@@ -254,10 +254,10 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
 <script>
 (function(){
   var d={customers:15,growth:3,churn:2,units:40,price:25,subscription:0,vat:21,variable:5,fixed:20000,cac:0,months:24};
-  function net(g,v){return v>0?Math.floor(Math.round(g)/(1+v/100)):Math.round(g)}
-  var c=d.customers,cum=0,rows=[],be=null,pb=null,p=net(d.price,d.vat);
+  function net(g,v){return Math.floor(g/(1+v/100)+1e-9)}
+  var c=d.customers,cum=0,rows=[],be=null,pb=null;
   for(var m=1;m<=d.months;m++){
-    var u=Math.round(c*d.units),rev=u*p,cost=u*d.variable+d.fixed,mar=rev-cost;cum+=mar;
+    var u=Math.round(c*d.units),rev=net(u*d.price,d.vat),cost=u*d.variable+d.fixed,mar=rev-cost;cum+=mar;
     if(be===null&&mar>=0)be=m; if(pb===null&&be!==null&&cum>=0)pb=m;
     rows.push({m:m,rev:rev,cost:cost,cum:cum}); c=c*(1-d.churn/100)+d.growth;
   }
