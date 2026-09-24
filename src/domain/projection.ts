@@ -14,6 +14,12 @@ const fraction = (percent: number): number =>
   Number.isFinite(percent) ? Math.min(100, Math.max(0, percent)) / 100 : 0;
 const vatFactor = (percent: number): number => 1 + (Number.isFinite(percent) && percent > 0 ? percent : 0) / 100;
 
+/** What one customer pays in a month, net of VAT: the average revenue per customer. */
+export function revenuePerCustomer(input: ProjectionInput): number {
+  const factor = vatFactor(input.vatPercent);
+  return Math.round((positive(input.unitsPerCustomerPerMonth) * positive(input.unitPriceCents) + positive(input.subscriptionCents)) / factor);
+}
+
 /** What one customer contributes each month once its own units are paid for. */
 export function contributionPerCustomer(input: ProjectionInput): number {
   const factor = vatFactor(input.vatPercent);
@@ -99,6 +105,7 @@ export function project(input: ProjectionInput): Projection {
     marginRate: totalRevenueCents > 0 ? totalMarginCents / totalRevenueCents : null,
     breakEvenMonth,
     paybackMonth,
+    revenuePerCustomerCents: revenuePerCustomer(input),
     contributionPerCustomerCents: contributionPerCustomer(input),
     breakEvenCustomers: breakEvenCustomers(input),
   };

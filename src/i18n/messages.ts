@@ -23,6 +23,7 @@ export interface Messages {
     monthsSuffix: string;
     presetSuffix: string;
     presets: string;
+    average(revenue: string, customer: string, contribution: string, units: string): string;
   };
   text: {
     title: string;
@@ -116,6 +117,7 @@ const en: Messages = {
     monthsSuffix: "months",
     presetSuffix: "mo",
     presets: "Horizon presets",
+    average: (r, c, k, u) => `avg ${r} revenue per ${c} a month excl. VAT · ${k} after its ${u}`,
   },
   text: {
     title: "Report title",
@@ -222,6 +224,7 @@ const nl: Messages = {
     monthsSuffix: "maanden",
     presetSuffix: "mnd",
     presets: "Vaste periodes",
+    average: (r, c, k, u) => `gemiddeld ${r} omzet per ${c} per maand excl. btw · ${k} na de eigen ${u}`,
   },
   text: {
     title: "Titel van het rapport",
@@ -328,6 +331,7 @@ const fr: Messages = {
     monthsSuffix: "mois",
     presetSuffix: "mois",
     presets: "Horizons prédéfinis",
+    average: (r, c, k, u) => `en moyenne ${r} de recettes par ${c} par mois HTVA · ${k} après ses ${u}`,
   },
   text: {
     title: "Titre du rapport",

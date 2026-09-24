@@ -110,7 +110,10 @@ export function Report() {
         </div>
       </div>
 
-      <Controls settings={settings} t={t} fmt={fmt} onNumber={onNumber} onText={onText}>
+      <Controls
+        settings={settings}
+        perCustomer={{ revenueCents: projection.revenuePerCustomerCents, contributionCents: projection.contributionPerCustomerCents }}
+        t={t} fmt={fmt} onNumber={onNumber} onText={onText}>
         <section className="group" aria-label={t.groups.share}>
           <h2>{t.groups.share}</h2>
           <div className="link" data-testid="share-query">

@@ -11,6 +11,8 @@ interface FieldView {
   label: (t: Messages["fields"], n: Nouns) => string;
   money?: boolean;
   suffix?: (t: Messages["fields"]) => string;
+  /** A "per customer per month" field: show the average a customer brings in next to it. */
+  average?: boolean;
   step: string;
 }
 
@@ -26,9 +28,9 @@ const GROUPS: { title: keyof Messages["groups"]; fields: FieldView[] }[] = [
   {
     title: "usage",
     fields: [
-      { key: "units", label: (t, n) => t.units(capitalize(n.unit()), n.customer(1)), step: "1" },
+      { key: "units", label: (t, n) => t.units(capitalize(n.unit()), n.customer(1)), average: true, step: "1" },
       { key: "price", label: (t, n) => t.price(n.unit(1)), money: true, step: "0.01" },
-      { key: "subscription", label: (t, n) => t.subscription(n.customer(1)), money: true, step: "1" },
+      { key: "subscription", label: (t, n) => t.subscription(n.customer(1)), money: true, average: true, step: "1" },
       { key: "vat", label: (t) => t.vat, suffix: () => "%", step: "1" },
     ],
   },
@@ -61,6 +63,7 @@ interface NumberFieldProps {
   settings: Settings;
   t: Messages;
   fmt: Formatter;
+  average?: string;
   onChange(key: NumericKey, value: number): void;
 }
 
@@ -68,7 +71,7 @@ interface NumberFieldProps {
  * Keeps its own draft so a half-typed value ("0.", "") can sit in the box
  * without resetting the report; only valid numbers reach the settings.
  */
-function NumberField({ field, settings, t, fmt, onChange }: NumberFieldProps) {
+function NumberField({ field, settings, t, fmt, average, onChange }: NumberFieldProps) {
   const spec = NUMERIC_FIELDS.find((f) => f.key === field.key)!;
   const id = `f-${field.key}`;
   const value = settings[field.key];
@@ -97,7 +100,7 @@ function NumberField({ field, settings, t, fmt, onChange }: NumberFieldProps) {
           step={field.step}
           value={draft}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? `${id}-err` : undefined}
+          aria-describedby={[error ? `${id}-err` : "", average ? `${id}-avg` : ""].filter(Boolean).join(" ") || undefined}
           onChange={(event) => {
             const next = event.target.value;
             setDraft(next);
@@ -113,6 +116,11 @@ function NumberField({ field, settings, t, fmt, onChange }: NumberFieldProps) {
       {error ? (
         <span className="err" id={`${id}-err`} role="alert">
           {error}
+        </span>
+      ) : null}
+      {average ? (
+        <span className="note average" id={`${id}-avg`} data-testid={`average-${field.key}`}>
+          {average}
         </span>
       ) : null}
     </div>
@@ -150,6 +158,8 @@ function TextField({ field, settings, t, onChange }: { field: TextView; settings
 
 export interface ControlsProps {
   settings: Settings;
+  /** Average revenue and contribution per customer per month, in cents. */
+  perCustomer: { revenueCents: number; contributionCents: number };
   t: Messages;
   fmt: Formatter;
   onNumber(key: NumericKey, value: number): void;
@@ -157,8 +167,10 @@ export interface ControlsProps {
   children?: React.ReactNode;
 }
 
-export function Controls({ settings, t, fmt, onNumber, onText, children }: ControlsProps) {
+export function Controls({ settings, perCustomer, t, fmt, onNumber, onText, children }: ControlsProps) {
   const labelsId = useId();
+  const noun = nouns(settings);
+  const average = t.fields.average(fmt.money(perCustomer.revenueCents), noun.customer(1), fmt.money(perCustomer.contributionCents), noun.unit());
   return (
     <aside className="rail">
       <form className="rail-form" noValidate onSubmit={(e) => e.preventDefault()}>
@@ -166,7 +178,7 @@ export function Controls({ settings, t, fmt, onNumber, onText, children }: Contr
           <section key={group.title} className="group" aria-label={t.groups[group.title]}>
             <h2>{t.groups[group.title]}</h2>
             {group.fields.map((field) => (
-              <NumberField key={field.key} field={field} settings={settings} t={t} fmt={fmt} onChange={onNumber} />
+              <NumberField key={field.key} field={field} settings={settings} t={t} fmt={fmt} average={field.average ? average : undefined} onChange={onNumber} />
             ))}
           </section>
         ))}

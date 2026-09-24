@@ -43,6 +43,7 @@ describe("toJson", () => {
       marginRate: projection.marginRate,
       breakEvenMonth: projection.breakEvenMonth,
       paybackMonth: projection.paybackMonth,
+      revenuePerCustomerCents: projection.revenuePerCustomerCents,
       contributionPerCustomerCents: projection.contributionPerCustomerCents,
       breakEvenCustomers: projection.breakEvenCustomers,
     });

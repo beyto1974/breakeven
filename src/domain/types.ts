@@ -57,6 +57,8 @@ export interface Projection {
   breakEvenMonth: number | null;
   /** First month, from break-even on, whose cumulative margin is not negative. */
   paybackMonth: number | null;
+  /** What one customer pays in a month, net of VAT. */
+  revenuePerCustomerCents: number;
   /** What one customer brings in a month after its own units are paid for. */
   contributionPerCustomerCents: number;
   /** Customers needed to cover the fixed costs, or null when no number is enough. */

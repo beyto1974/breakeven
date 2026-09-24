@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { breakEvenCustomers, contributionPerCustomer, project } from "../projection";
+import { breakEvenCustomers, contributionPerCustomer, project, revenuePerCustomer } from "../projection";
 import type { ProjectionInput } from "../types";
 
 const base: ProjectionInput = {
@@ -154,5 +154,16 @@ describe("breakEvenCustomers", () => {
 
   test("is zero when there are no fixed costs and a positive contribution", () => {
     expect(breakEvenCustomers(input({ fixedCostPerMonthCents: 0 }))).toBe(0);
+  });
+});
+
+describe("revenuePerCustomer", () => {
+  test("is what one customer pays in a month, net of VAT", () => {
+    // 10 units × 1.25 + 2.50 subscription = 15.00 gross; at 25 % VAT, 12.00 net.
+    expect(revenuePerCustomer(input({ unitPriceCents: 125, subscriptionCents: 250, vatPercent: 25 }))).toBe(1200);
+  });
+
+  test("ignores costs", () => {
+    expect(revenuePerCustomer(input({ variableCostPerUnitCents: 99 }))).toBe(1000);
   });
 });
