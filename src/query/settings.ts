@@ -5,8 +5,10 @@
  */
 import { toCents } from "@/domain/money";
 import type { ProjectionInput } from "@/domain/types";
+import { isLang, type Lang } from "@/i18n/lang";
 
 export interface Settings {
+  lang: Lang;
   customers: number;
   growth: number;
   churn: number;
@@ -23,11 +25,14 @@ export interface Settings {
   locale: string;
   customer: string;
   unit: string;
+  /** Explicit plurals for irregular nouns; empty means the language's rules. */
+  customerPlural: string;
+  unitPlural: string;
   title: string;
 }
 
 export type NumericKey = { [K in keyof Settings]: Settings[K] extends number ? K : never }[keyof Settings];
-export type TextKey = Exclude<keyof Settings, NumericKey>;
+export type TextKey = Exclude<keyof Settings, NumericKey | "lang">;
 
 export type WarningReason = "not-a-number" | "not-an-integer" | "out-of-range" | "invalid" | "too-long";
 
@@ -61,11 +66,12 @@ export const NUMERIC_FIELDS: readonly NumericField[] = [
   { key: "months", min: 1, max: 120, integer: true },
 ];
 
-const TEXT_ORDER: readonly TextKey[] = ["currency", "locale", "customer", "unit", "title"];
+const TEXT_ORDER: readonly TextKey[] = ["currency", "locale", "customer", "customerPlural", "unit", "unitPlural", "title"];
 
 export const MONTH_PRESETS = [12, 24, 36, 60] as const;
 
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
+  lang: "en",
   customers: 15,
   growth: 3,
   churn: 2,
@@ -81,12 +87,49 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   locale: "en-IE",
   customer: "customer",
   unit: "unit",
+  customerPlural: "",
+  unitPlural: "",
   title: "Rentability",
 });
 
+/** What follows the language: formatting, nouns and heading. */
+const LANGUAGE_DEFAULTS: Record<Lang, Pick<Settings, "locale" | "customer" | "unit" | "title">> = {
+  en: { locale: "en-IE", customer: "customer", unit: "unit", title: "Rentability" },
+  nl: { locale: "nl-BE", customer: "klant", unit: "eenheid", title: "Rentabiliteit" },
+  fr: { locale: "fr-BE", customer: "client", unit: "unité", title: "Rentabilité" },
+};
+
+/** The defaults a report in `lang` starts from. Only the language-bound fields differ. */
+export function defaultsFor(lang: Lang): Readonly<Settings> {
+  return { ...DEFAULT_SETTINGS, lang, ...LANGUAGE_DEFAULTS[lang] };
+}
+
+/**
+ * Switches language, carrying custom values across: a field still at the old
+ * language's default takes the new one; anything the user typed stays.
+ */
+export function switchLang(settings: Settings, lang: Lang): Settings {
+  const before = defaultsFor(settings.lang);
+  const after = defaultsFor(lang);
+  const next: Settings = { ...settings, lang };
+  for (const key of ["locale", "customer", "unit", "title"] as const) {
+    if (settings[key] === before[key]) next[key] = after[key];
+  }
+  // Plurals belong to the old nouns; keep them only if the nouns were kept.
+  if (next.customer !== settings.customer) next.customerPlural = "";
+  if (next.unit !== settings.unit) next.unitPlural = "";
+  return next;
+}
+
 type TextResult = { ok: true; value: string } | { ok: false; reason: WarningReason };
 
-const MAX_LENGTH: Record<"customer" | "unit" | "title", number> = { customer: 32, unit: 32, title: 80 };
+const MAX_LENGTH: Record<"customer" | "unit" | "customerPlural" | "unitPlural" | "title", number> = {
+  customer: 32,
+  unit: 32,
+  customerPlural: 32,
+  unitPlural: 32,
+  title: 80,
+};
 
 function readCurrency(raw: string): TextResult {
   const code = raw.trim().toUpperCase();
@@ -131,9 +174,22 @@ export function readNumber(field: NumericField, raw: string): NumberResult {
   return { ok: true, value: field.money ? Math.round(parsed * 10_000) / 10_000 : parsed };
 }
 
-export function parseSettings(query: URLSearchParams): { settings: Settings; warnings: SettingsWarning[] } {
-  const settings: Settings = { ...DEFAULT_SETTINGS };
+/**
+ * @param fallbackLang the language when the query names none, e.g. the browser's.
+ */
+export function parseSettings(
+  query: URLSearchParams,
+  fallbackLang: Lang = "en",
+): { settings: Settings; warnings: SettingsWarning[] } {
   const warnings: SettingsWarning[] = [];
+  const rawLang = query.get("lang");
+  let lang = fallbackLang;
+  if (rawLang !== null && rawLang.trim() !== "") {
+    const code = rawLang.trim().toLowerCase();
+    if (isLang(code)) lang = code;
+    else warnings.push({ param: "lang", value: rawLang, reason: "invalid" });
+  }
+  const settings: Settings = { ...defaultsFor(lang) };
 
   for (const field of NUMERIC_FIELDS) {
     const raw = query.get(field.key);
@@ -157,11 +213,13 @@ export function parseSettings(query: URLSearchParams): { settings: Settings; war
 /** Only what differs from the defaults, so the default report is a bare path. */
 export function serializeSettings(settings: Settings): string {
   const query = new URLSearchParams();
+  const defaults = defaultsFor(settings.lang);
+  if (settings.lang !== DEFAULT_SETTINGS.lang) query.set("lang", settings.lang);
   for (const { key } of NUMERIC_FIELDS) {
-    if (settings[key] !== DEFAULT_SETTINGS[key]) query.set(key, String(settings[key]));
+    if (settings[key] !== defaults[key]) query.set(key, String(settings[key]));
   }
   for (const key of TEXT_ORDER) {
-    if (settings[key] !== DEFAULT_SETTINGS[key]) query.set(key, settings[key]);
+    if (settings[key] !== defaults[key]) query.set(key, settings[key]);
   }
   return query.toString();
 }

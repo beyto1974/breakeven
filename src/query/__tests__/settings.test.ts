@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { DEFAULT_SETTINGS, parseSettings, serializeSettings, toProjectionInput } from "../settings";
+import { DEFAULT_SETTINGS, defaultsFor, parseSettings, serializeSettings, switchLang, toProjectionInput } from "../settings";
 
 describe("parseSettings", () => {
   test("an empty query yields the defaults and no warnings", () => {
@@ -10,6 +10,7 @@ describe("parseSettings", () => {
 
   test("the defaults match the blueprint", () => {
     expect(DEFAULT_SETTINGS).toEqual({
+      lang: "en",
       customers: 15,
       growth: 3,
       churn: 2,
@@ -25,6 +26,8 @@ describe("parseSettings", () => {
       locale: "en-IE",
       customer: "customer",
       unit: "unit",
+      customerPlural: "",
+      unitPlural: "",
       title: "Rentability",
     });
   });
@@ -151,5 +154,50 @@ describe("toProjectionInput", () => {
       acquisitionCostCents: 0,
       months: 24,
     });
+  });
+});
+
+describe("language", () => {
+  test("lang selects the language defaults", () => {
+    const { settings, warnings } = parseSettings(new URLSearchParams("lang=nl"));
+    expect(settings).toEqual(defaultsFor("nl"));
+    expect(settings).toMatchObject({ lang: "nl", locale: "nl-BE", customer: "klant", unit: "eenheid", title: "Rentabiliteit" });
+    expect(warnings).toEqual([]);
+  });
+
+  test("French defaults", () => {
+    expect(defaultsFor("fr")).toMatchObject({ locale: "fr-BE", customer: "client", unit: "unité", title: "Rentabilité" });
+  });
+
+  test("lang is case-insensitive; an unknown one warns and uses the fallback", () => {
+    expect(parseSettings(new URLSearchParams("lang=FR")).settings.lang).toBe("fr");
+    const { settings, warnings } = parseSettings(new URLSearchParams("lang=de"), "nl");
+    expect(settings.lang).toBe("nl");
+    expect(warnings).toEqual([{ param: "lang", value: "de", reason: "invalid" }]);
+  });
+
+  test("without lang, the fallback language applies", () => {
+    expect(parseSettings(new URLSearchParams(""), "fr").settings).toEqual(defaultsFor("fr"));
+  });
+
+  test("serialises lang first and compares against that language's defaults", () => {
+    expect(serializeSettings(defaultsFor("nl"))).toBe("lang=nl");
+    expect(serializeSettings({ ...defaultsFor("fr"), customers: 20, customer: "entreprise" })).toBe("lang=fr&customers=20&customer=entreprise");
+  });
+
+  test("round-trips a non-English report with explicit plurals", () => {
+    const settings = { ...defaultsFor("nl"), unit: "museum", unitPlural: "musea", growth: 2.5 };
+    expect(parseSettings(new URLSearchParams(serializeSettings(settings))).settings).toEqual(settings);
+  });
+
+  test("switchLang moves default fields to the new language and keeps custom ones", () => {
+    const switched = switchLang({ ...DEFAULT_SETTINGS, customer: "company", fixed: 500 }, "nl");
+    expect(switched).toMatchObject({ lang: "nl", locale: "nl-BE", unit: "eenheid", title: "Rentabiliteit", customer: "company", fixed: 500 });
+  });
+
+  test("switchLang drops a plural whose noun was replaced", () => {
+    const switched = switchLang({ ...DEFAULT_SETTINGS, unitPlural: "units!" }, "fr");
+    expect(switched.unit).toBe("unité");
+    expect(switched.unitPlural).toBe("");
   });
 });
