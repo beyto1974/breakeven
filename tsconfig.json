@@ -16,6 +16,6 @@
     "types": ["bun"],
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "prototype/**/*.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules"]
 }

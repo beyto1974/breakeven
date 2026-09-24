@@ -26,7 +26,7 @@ Inspired by an internal profitability simulator, generalised: nouns, currency an
 | `cac` | Acquisition cost per new customer | 0 | 0 – 1 000 000 |
 | `months` | Horizon | 24 | 1 – 120 |
 | `currency` | ISO 4217 code | EUR | |
-| `locale` | BCP 47 tag | en-BE | |
+| `locale` | BCP 47 tag | en-IE | |
 | `customer` / `unit` | Nouns used in labels | customer / unit | 1 – 32 chars |
 | `title` | Report heading | Rentability | 1 – 80 chars |
 

@@ -22,7 +22,7 @@ describe("parseSettings", () => {
       cac: 0,
       months: 24,
       currency: "EUR",
-      locale: "en-BE",
+      locale: "en-IE",
       customer: "customer",
       unit: "unit",
       title: "Rentability",
@@ -88,7 +88,7 @@ describe("parseSettings", () => {
   test("rejects an unknown currency or a malformed locale", () => {
     const { settings, warnings } = parseSettings(new URLSearchParams("currency=EURO&locale=not_a_locale!"));
     expect(settings.currency).toBe("EUR");
-    expect(settings.locale).toBe("en-BE");
+    expect(settings.locale).toBe("en-IE");
     expect(warnings.map((w) => w.param)).toEqual(["currency", "locale"]);
     expect(warnings.every((w) => w.reason === "invalid")).toBe(true);
   });

@@ -1,0 +1,239 @@
+<title>Rentability Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --sunken:#EEF1F6; --ink:#101828; --muted:#5B6576; --line:#DDE2EA;
+  --accent:#3A4BE0; --accent-ink:#FFFFFF; --accent-soft:#E6E9FC;
+  --profit:#0E9F6E; --profit-soft:#DDF4EA; --loss:#D93F55; --loss-soft:#FBE3E7; --warn:#B7791F; --warn-soft:#FBF0DA;
+  --cost-fixed:#E7A4AF; --cost-variable:#D93F55; --cost-acq:#9E2A3D;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0C1220; --surface:#141B2D; --sunken:#10172A; --ink:#E7ECF5; --muted:#98A2B6; --line:#26304A;
+    --accent:#8C9BFF; --accent-ink:#0C1220; --accent-soft:#1F2850;
+    --profit:#34D399; --profit-soft:#12352C; --loss:#FF6B81; --loss-soft:#3A1822; --warn:#F6C35B; --warn-soft:#3A2E14;
+    --cost-fixed:#6B2E3A; --cost-variable:#FF6B81; --cost-acq:#FFB3BF;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0C1220; --surface:#141B2D; --sunken:#10172A; --ink:#E7ECF5; --muted:#98A2B6; --line:#26304A;
+  --accent:#8C9BFF; --accent-ink:#0C1220; --accent-soft:#1F2850;
+  --profit:#34D399; --profit-soft:#12352C; --loss:#FF6B81; --loss-soft:#3A1822; --warn:#F6C35B; --warn-soft:#3A2E14;
+  --cost-fixed:#6B2E3A; --cost-variable:#FF6B81; --cost-acq:#FFB3BF;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--body);padding:0 16px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shell{max-width:1320px;margin:0 auto;padding-block:28px 64px;display:grid;grid-template-columns:320px minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:960px){.shell{grid-template-columns:1fr}}
+
+/* controls */
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:grid;gap:14px;max-height:calc(100vh - 32px);overflow:auto;padding-right:4px}
+@media (max-width:960px){.rail{position:static;max-height:none;overflow:visible}}
+.brand{display:flex;align-items:center;gap:10px;font:700 15px/1 var(--display);letter-spacing:-.01em}
+.brand svg{flex:none}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:grid;gap:12px}
+.group h2{margin:0;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.field{display:grid;gap:5px}
+.field label{font-size:13px;font-weight:500}
+.input{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;background:var(--sunken);transition:border-color .15s,box-shadow .15s}
+.input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.input input{flex:1;min-width:0;border:0;background:transparent;padding:8px 10px;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px}
+.input input:focus{outline:none}
+.input .affix{padding:0 10px;font:12px/1 var(--mono);color:var(--muted);white-space:nowrap}
+.input .affix.pre{padding-right:0}
+.field.invalid .input{border-color:var(--loss)}
+.field .err{font-size:12px;color:var(--loss)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font:500 13px/1 var(--mono);cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+details.group summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.group summary::-webkit-details-marker{display:none}
+details.group summary::after{content:"+";font:500 16px/1 var(--mono);color:var(--muted)}
+details.group[open] summary::after{content:"−"}
+.input.text input{font-family:var(--body)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 12px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);grid-column:1/-1}
+.btn.primary:hover{filter:brightness(1.08);color:var(--accent-ink)}
+.link{font:12px/1.5 var(--mono);color:var(--muted);word-break:break-all;background:var(--sunken);border-radius:9px;padding:8px 10px;border:1px dashed var(--line)}
+
+/* report */
+.report{display:grid;gap:22px;min-width:0}
+.hero{display:grid;gap:14px;padding:26px 28px;border-radius:20px;background:
+  radial-gradient(120% 140% at 100% 0%,var(--accent-soft) 0%,transparent 55%),var(--surface);border:1px solid var(--line)}
+.hero-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.verdict{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.verdict::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.verdict.repaid{background:var(--profit-soft);color:var(--profit)}
+.verdict.turning{background:var(--warn-soft);color:var(--warn)}
+.verdict.loss,.verdict.never{background:var(--loss-soft);color:var(--loss)}
+.hero h1{margin:0;font:700 clamp(28px,4vw,44px)/1.05 var(--display);letter-spacing:-.02em;text-wrap:balance}
+.hero p{margin:0;font-size:clamp(16px,1.6vw,19px);line-height:1.5;max-width:62ch;color:var(--ink)}
+.hero p b{font-family:var(--mono);font-weight:500;color:var(--accent);background:var(--accent-soft);padding:1px 6px;border-radius:6px;white-space:nowrap}
+.warnings{display:flex;gap:8px;flex-wrap:wrap}
+.warning{font:12px/1.3 var(--mono);background:var(--warn-soft);color:var(--warn);padding:6px 10px;border-radius:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:grid;gap:6px;align-content:start}
+.kpi .label{font:500 11px/1.2 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.kpi .value{font:700 30px/1.05 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .value.pos{color:var(--profit)} .kpi .value.neg{color:var(--loss)}
+.kpi .hint{font-size:12.5px;color:var(--muted)}
+.meter{position:relative;height:8px;border-radius:999px;background:var(--sunken);margin-top:6px}
+.meter .fill{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--profit))}
+.meter .mark{position:absolute;top:-4px;width:2px;height:16px;background:var(--ink);border-radius:1px}
+.meter-legend{display:flex;justify-content:space-between;font:11px/1 var(--mono);color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:grid;gap:14px;min-width:0}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.card h2{margin:0;font:700 19px/1.2 var(--display);letter-spacing:-.01em}
+.card .sub{color:var(--muted);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font:12px/1 var(--mono);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.legend i.line{height:3px;border-radius:2px;vertical-align:3px;width:14px}
+.chart-wrap{position:relative}
+.chart{display:block;width:100%;height:auto;touch-action:pan-y}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 12px;font:12px/1.6 var(--mono);min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.18);transform:translate(-50%,-100%)}
+.tip b{font-family:var(--display);font-size:13px}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+.heat-wrap{overflow-x:auto}
+.heat{border-collapse:separate;border-spacing:4px;min-width:560px;width:100%}
+.heat th{font:500 11px/1.2 var(--mono);color:var(--muted);font-weight:500;padding:4px}
+.heat th.corner{text-align:left}
+.heat td{padding:0}
+.heat button{width:100%;border:0;border-radius:8px;padding:10px 4px;font:500 13px/1.1 var(--mono);font-variant-numeric:tabular-nums;cursor:pointer;display:grid;gap:3px;transition:transform .12s}
+.heat button:hover{transform:scale(1.05)}
+.heat button small{font-size:10px;opacity:.75}
+.heat button.current{outline:2px solid var(--ink);outline-offset:1px}
+.scale-note{display:flex;gap:14px;flex-wrap:wrap;font:12px/1 var(--mono);color:var(--muted)}
+.scale-note i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.table-wrap{overflow-x:auto;max-height:520px;border-radius:10px;border:1px solid var(--line)}
+table.months{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
+.months th{position:sticky;top:0;background:var(--sunken);font:500 11px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:right;padding:9px 12px;white-space:nowrap}
+.months th:first-child,.months td:first-child{text-align:left}
+.months td{padding:8px 12px;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;border-top:1px solid var(--line);white-space:nowrap}
+.months td.neg{color:var(--loss)} .months td.pos{color:var(--profit)}
+.months tr.mark td{background:var(--accent-soft)}
+.months tr.mark td:first-child::after{content:attr(data-mark);margin-left:8px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);width:min(760px,calc(100vw - 32px));padding:18px}
+dialog::backdrop{background:rgba(12,18,32,.45)}
+dialog textarea{width:100%;height:340px;font:12px/1.5 var(--mono);background:var(--sunken);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical}
+.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.dialog-head h3{margin:0;font:700 17px/1.2 var(--display)}
+.dialog-actions{display:flex;gap:8px}
+.note{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font:500 13px/1 var(--body)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<div id="root" class="shell"></div>
+<script>(()=>{var kt=(t)=>Number.isFinite(t)&&t>0?t:0;function Q(t,e){let n=kt(e);return Math.floor(t/(1+n/100)+0.000000001)}function R(t){return Math.round(t*1e4)/100}function tt(t){return Math.round(t*100)/1e4}var x=(t)=>Number.isFinite(t)&&t>0?t:0,Ct=(t)=>Number.isFinite(t)?Math.min(100,Math.max(0,t))/100:0,Mt=(t)=>1+(Number.isFinite(t)&&t>0?t:0)/100;function et(t){let e=Mt(t.vatPercent),n=x(t.unitPriceCents)/e-x(t.variableCostPerUnitCents);return Math.round(x(t.unitsPerCustomerPerMonth)*n+x(t.subscriptionCents)/e)}function K(t){let e=et(t);if(e<=0)return null;return Math.ceil(Math.round(x(t.fixedCostPerMonthCents))/e)}function A(t){let e=Math.max(1,Math.round(x(t.months))),n=x(t.newCustomersPerMonth),o=Ct(t.churnPercentPerMonth),r=x(t.unitsPerCustomerPerMonth),s=x(t.unitPriceCents),i=x(t.subscriptionCents),m=x(t.variableCostPerUnitCents),a=Math.round(x(t.fixedCostPerMonthCents)),u=x(t.acquisitionCostCents),d=[],y=x(t.customers),v=0,h=null,f=null;for(let E=0;E<e;E+=1){let c=E+1,L=Math.round(y),k=c===1?0:n,C=Math.round(y*r),I=Q(C*s+L*i,t.vatPercent),j=Math.round(C*m),Z=Math.round(k*u),Y=j+Z+a,V=I-Y;if(v+=V,h===null&&V>=0)h=c;if(f===null&&h!==null&&v>=0)f=c;d.push({month:c,customers:L,newCustomers:Math.round(k*100)/100,units:C,revenueCents:I,variableCostCents:j,acquisitionCostCents:Z,fixedCostCents:a,costCents:Y,marginCents:V,cumulativeMarginCents:v}),y=y*(1-o)+n}let S=d.reduce((E,c)=>E+c.revenueCents,0),T=d.reduce((E,c)=>E+c.costCents,0),U=S-T;return{months:d,totalRevenueCents:S,totalCostCents:T,totalMarginCents:U,marginRate:S>0?U/S:null,breakEvenMonth:h,paybackMonth:f,contributionPerCustomerCents:et(t),breakEvenCustomers:K(t)}}var St=[0.5,0.75,0.9,1,1.1,1.25,1.5],nt=(t)=>Math.round(t*1e4)/1e4;function rt(t,e=St){return{rows:e.map((o)=>{let r=nt(t.unitsPerCustomerPerMonth*o),s=e.map((i)=>{let m=nt(t.unitPriceCents*i),a={...t,unitsPerCustomerPerMonth:r,unitPriceCents:m},u=A(a);return{priceFactor:i,unitPriceCents:m,breakEvenCustomers:K(a),breakEvenMonth:u.breakEvenMonth,totalMarginCents:u.totalMarginCents,isCurrent:o===1&&i===1}});return{unitsFactor:o,unitsPerCustomer:r,cells:s}})}}var q=[{key:"customers",min:0,max:1e6},{key:"growth",min:0,max:1e5},{key:"churn",min:0,max:100},{key:"units",min:0,max:1e6},{key:"price",min:0,max:1e6,money:!0},{key:"subscription",min:0,max:1e6,money:!0},{key:"vat",min:0,max:100},{key:"variable",min:0,max:1e6,money:!0},{key:"fixed",min:0,max:1e8,money:!0},{key:"cac",min:0,max:1e6,money:!0},{key:"months",min:1,max:120,integer:!0}],ot=["currency","locale","customer","unit","title"],st=[12,24,36,60],P=Object.freeze({customers:15,growth:3,churn:2,units:40,price:0.25,subscription:0,vat:21,variable:0.05,fixed:200,cac:0,months:24,currency:"EUR",locale:"en-IE",customer:"customer",unit:"unit",title:"Rentability"}),Et={customer:32,unit:32,title:80};function Pt(t){let e=t.trim().toUpperCase();if(!/^[A-Z]{3}$/.test(e))return{ok:!1,reason:"invalid"};let n=typeof Intl.supportedValuesOf==="function"?Intl.supportedValuesOf("currency"):null;if(n&&!n.includes(e))return{ok:!1,reason:"invalid"};return{ok:!0,value:e}}function wt(t){try{let[e]=Intl.getCanonicalLocales(t.trim());return e?{ok:!0,value:e}:{ok:!1,reason:"invalid"}}catch{return{ok:!1,reason:"invalid"}}}function Ft(t,e){let n=t.trim().replace(/\s+/g," ");if(n.length===0)return{ok:!1,reason:"invalid"};if(n.length>e)return{ok:!1,reason:"too-long"};return{ok:!0,value:n}}function Tt(t,e){if(t==="currency")return Pt(e);if(t==="locale")return wt(e);return Ft(e,Et[t])}function W(t,e){let n=e.trim().replace(",",".");if(!/^-?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(n))return{ok:!1,reason:"not-a-number"};let o=Number(n);if(!Number.isFinite(o))return{ok:!1,reason:"not-a-number"};if(t.integer&&!Number.isInteger(o))return{ok:!1,reason:"not-an-integer"};if(o<t.min||o>t.max)return{ok:!1,reason:"out-of-range"};return{ok:!0,value:t.money?Math.round(o*1e4)/1e4:o}}function G(t){let e={...P},n=[];for(let o of q){let r=t.get(o.key);if(r===null||r.trim()==="")continue;let s=W(o,r);if(s.ok)e[o.key]=s.value;else n.push({param:o.key,value:r,reason:s.reason})}for(let o of ot){let r=t.get(o);if(r===null||r.trim()==="")continue;let s=Tt(o,r);if(s.ok)e[o]=s.value;else n.push({param:o,value:r,reason:s.reason})}return{settings:e,warnings:n}}function _(t){let e=new URLSearchParams;for(let{key:n}of q)if(t[n]!==P[n])e.set(n,String(t[n]));for(let n of ot)if(t[n]!==P[n])e.set(n,t[n]);return e.toString()}function z(t){return{customers:t.customers,newCustomersPerMonth:t.growth,churnPercentPerMonth:t.churn,unitsPerCustomerPerMonth:t.units,unitPriceCents:R(t.price),subscriptionCents:R(t.subscription),vatPercent:t.vat,variableCostPerUnitCents:R(t.variable),fixedCostPerMonthCents:R(t.fixed),acquisitionCostCents:R(t.cac),months:t.months}}var Lt=["month","customers","new_customers","units","revenue","variable_cost","acquisition_cost","fixed_cost","total_cost","margin","cumulative_margin"],N=(t)=>(t/100).toFixed(2);function it(t){let e=t.months.map((n)=>[String(n.month),String(n.customers),String(n.newCustomers),String(n.units),N(n.revenueCents),N(n.variableCostCents),N(n.acquisitionCostCents),N(n.fixedCostCents),N(n.costCents),N(n.marginCents),N(n.cumulativeMarginCents)].join(","));return[Lt.join(","),...e].join(`
+`)+`
+`}function at(t,e){let{months:n,...o}=e;return JSON.stringify({settings:t,query:_(t),summary:o,months:n},null,2)}function ct(t,e){return`${t.title.normalize("NFKD").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"rentability"}-${t.months}m.${e}`}function J(t,e,n){try{return new Intl.NumberFormat(t,{style:"currency",currency:e,...n})}catch{return new Intl.NumberFormat("en",{style:"currency",currency:"EUR",...n})}}function H({locale:t,currency:e}){let n=J(t,e,{maximumFractionDigits:0,minimumFractionDigits:0}),o=J(t,e,{minimumFractionDigits:2,maximumFractionDigits:2}),r=J(t,e,{minimumFractionDigits:2,maximumFractionDigits:4}),s,i;try{s=new Intl.NumberFormat(t,{maximumFractionDigits:0}),i=new Intl.NumberFormat(t,{style:"percent",maximumFractionDigits:1})}catch{s=new Intl.NumberFormat("en",{maximumFractionDigits:0}),i=new Intl.NumberFormat("en",{style:"percent",maximumFractionDigits:1})}let m=o.formatToParts(0).find((a)=>a.type==="currency")?.value??e;return{moneyShort:(a)=>n.format(Math.round(a)/100),money:(a)=>o.format(Math.round(a)/100),unitPrice:(a)=>r.format(a/100),integer:(a)=>s.format(a),percent:(a)=>a===null?"—":i.format(a),currencySymbol:m}}function It(t){let e=10**Math.floor(Math.log10(t)),n=t/e;return(n<=1?1:n<=2?2:n<=5?5:10)*e}function lt(t,e,n){let o=Math.min(0,t),r=Math.max(0,e);if(r-o<=0)return{min:0,max:1,step:1,ticks:[0,1]};let s=It((r-o)/Math.max(1,n)),i=Math.floor(o/s)*s,m=Math.ceil(r/s)*s,a=[];for(let u=0;i+u*s<=m+s/2;u+=1)a.push(Number((i+u*s).toPrecision(12)));return{min:i,max:m,step:s,ticks:a}}function ut([t,e],[n,o]){let r=e-t;if(r===0)return()=>n;return(s)=>n+(s-t)/r*(o-n)}function mt(t,e,n){if(t===null)return"never";if(t<=e)return"now";if(t<=Math.max(e,n))return"horizon";return"beyond"}function g(t,e=2){if(e===1)return t;if(/[^aeiou]y$/i.test(t))return t.slice(0,-1)+"ies";if(/(s|x|z|ch|sh)$/i.test(t))return t+"es";return t+"s"}function dt(t,e,n){let{breakEvenCustomers:o,breakEvenMonth:r,paybackMonth:s}=t,i=[],m=(h)=>(i.push(h),h),a=(h,f)=>({verdict:h,sentence:f,highlights:i});if(o===null)return a("never",`Each ${e.customer} costs more than it brings in, so no number of ${g(e.customer)} covers the fixed costs.`);let u=t.months[0]?.fixedCostCents??0,d=u===0?`There are no fixed costs, so every ${e.customer} adds margin.`:`${m(`${n.integer(o)} ${g(e.customer,o)}`)} ${o===1?"covers":"cover"} ${m(n.moneyShort(u))} of fixed costs a month.`,y=()=>m(`${e.months} ${g("month",e.months)}`);if(r===null)return a("loss",`${d} The margin does not turn within ${y()}.`);if(r===1&&s===1)return a("repaid",`${d} The margin is positive from ${m("month 1")}.`);let v=`The margin turns in ${m(`month ${r}`)}`;if(s===null)return a("turning",`${d} ${v}, but the early losses are not repaid within ${y()}.`);return a("repaid",`${d} ${v} and the early losses are repaid in ${m(`month ${s}`)}.`)}var jt=document.getElementById("root"),bt=(()=>{try{return G(new URLSearchParams(location.search))}catch{return{settings:{...P},warnings:[]}}})(),{settings:l,warnings:B}=bt,p=(t)=>t.replace(/[&<>"']/g,(e)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[e]),F=(t)=>t.charAt(0).toUpperCase()+t.slice(1),yt=[{title:"Customers",fields:[{key:"customers",label:(t)=>`${F(g(t.customer))} at the start`,step:"1"},{key:"growth",label:(t)=>`New ${g(t.customer)} per month`,step:"0.5"},{key:"churn",label:(t)=>`${F(g(t.customer))} lost per month`,suffix:()=>"%",step:"0.5"}]},{title:"Usage & price",fields:[{key:"units",label:(t)=>`${F(g(t.unit))} per ${t.customer} per month`,step:"1"},{key:"price",label:(t)=>`Price per ${t.unit}, VAT incl.`,prefix:"currency",step:"0.01"},{key:"subscription",label:(t)=>`Subscription per ${t.customer} / month`,prefix:"currency",step:"1"},{key:"vat",label:()=>"VAT included in prices",suffix:()=>"%",step:"1"}]},{title:"Costs",fields:[{key:"variable",label:(t)=>`Cost per ${t.unit}`,prefix:"currency",step:"0.01"},{key:"fixed",label:()=>"Fixed costs per month",prefix:"currency",step:"10"},{key:"cac",label:(t)=>`Acquisition cost per new ${t.customer}`,prefix:"currency",step:"5"}]}],Nt=[{key:"title",label:"Report title"},{key:"customer",label:"Customer noun",hint:"singular, e.g. company"},{key:"unit",label:"Unit noun",hint:"singular, e.g. order"},{key:"currency",label:"Currency",hint:"ISO code, e.g. EUR"},{key:"locale",label:"Locale",hint:"e.g. en-IE, fr-BE, nl-BE"}];function Rt(t,e){let n=q.find((i)=>i.key===t.key),o=`f-${t.key}`,r=t.prefix==="currency"?`<span class="affix pre" data-currency>${p(e.currencySymbol)}</span>`:"",s=t.suffix?`<span class="affix">${p(t.suffix(l))}</span>`:"";return`<div class="field" data-field="${t.key}">
+    <label for="${o}" data-label="${t.key}">${p(t.label(l))}</label>
+    <div class="input">${r}<input id="${o}" name="${t.key}" type="number" inputmode="decimal" required
+      min="${n.min}" max="${n.max}" step="${t.step}" value="${l[t.key]}"
+      aria-describedby="${o}-err">${s}</div>
+    <span class="err" id="${o}-err" hidden></span>
+  </div>`}function _t(t){let e=yt.map((r)=>`<section class="group" aria-label="${p(r.title)}"><h2>${p(r.title)}</h2>${r.fields.map((s)=>Rt(s,t)).join("")}</section>`).join(""),n=st.map((r)=>`<button type="button" class="pill" data-months="${r}" aria-pressed="${l.months===r}">${r} mo</button>`).join(""),o=Nt.map((r)=>`<div class="field"><label for="t-${r.key}">${p(r.label)}</label>
+      <div class="input text"><input id="t-${r.key}" name="${r.key}" type="text" maxlength="${r.key==="title"?80:32}"
+      value="${p(l[r.key])}" placeholder="${p(P[r.key])}" autocomplete="off"></div>
+      ${r.hint?`<span class="note">${p(r.hint)}</span>`:""}</div>`).join("");return`<aside class="rail">
+    <div class="brand"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18 L9 12 L13 15 L21 6" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="21" cy="6" r="2.2" fill="var(--profit)"/></svg>Rentability</div>
+    <form id="form" class="rail-form" novalidate style="display:grid;gap:14px">
+      ${e}
+      <section class="group" aria-label="Horizon"><h2>Horizon</h2>
+        <div class="pills" role="group" aria-label="Horizon presets">${n}</div>
+        <div class="field" data-field="months"><label for="f-months">Months</label>
+          <div class="input"><input id="f-months" name="months" type="number" inputmode="numeric" required min="1" max="120" step="1" value="${l.months}" aria-describedby="f-months-err"><span class="affix">months</span></div>
+          <span class="err" id="f-months-err" hidden></span></div>
+      </section>
+      <details class="group"><summary><h2>Labels &amp; currency</h2></summary><div style="display:grid;gap:12px;margin-top:12px">${o}</div></details>
+    </form>
+    <section class="group" aria-label="Share"><h2>Share</h2>
+      <div class="link" id="share-link"></div>
+      <div class="actions">
+        <button type="button" class="btn primary" id="copy-link">Copy link</button>
+        <button type="button" class="btn" id="show-json">JSON</button>
+        <button type="button" class="btn" id="show-csv">CSV</button>
+        <button type="button" class="btn" id="reset" style="grid-column:1/-1">Reset to defaults</button>
+      </div>
+    </section>
+  </aside>`}function At(t,e){let n=t.months[0]?.customers??0,o=t.months.at(-1)?.customers??0,r=t.breakEvenCustomers,s=Math.max(o,n,r??0,1)*1.1,i=(y)=>`${Math.min(100,y/s*100).toFixed(1)}%`,m=r===null?"":`<div class="meter" role="img" aria-label="${n} at the start, ${o} at the end, ${r} needed">
+          <div class="fill" style="width:${i(o)}"></div><div class="mark" style="left:${i(r)}"></div></div>
+         <div class="meter-legend"><span>start ${e.integer(n)}</span><span>end ${e.integer(o)}</span></div>`,a=t.totalMarginCents>=0?"pos":"neg",u=(t.marginRate??0)>=0?"pos":"neg",d=(y,v,h,f="",S="")=>`<div class="kpi"><span class="label">${y}</span><span class="value ${S}">${v}</span>${f}<span class="hint">${h}</span></div>`;return`<div class="kpis">
+    ${d("Break-even threshold",r===null?"never":`${e.integer(r)} <small style="font:500 14px var(--body);color:var(--muted)">${p(g(l.customer,r))}</small>`,`each brings ${e.money(t.contributionPerCustomerCents)} a month after its ${p(g(l.unit))}`,m,r===null?"neg":"")}
+    ${d("First profitable month",t.breakEvenMonth===null?"not yet":`M${t.breakEvenMonth}`,t.paybackMonth===null?`losses not repaid within ${l.months} months`:`losses repaid in month ${t.paybackMonth}`,"",t.breakEvenMonth===null?"neg":"")}
+    ${d(`Margin over ${l.months} months`,e.moneyShort(t.totalMarginCents),`revenue ${e.moneyShort(t.totalRevenueCents)} excl. VAT · costs ${e.moneyShort(t.totalCostCents)}`,"",a)}
+    ${d("Margin rate",e.percent(t.marginRate),"of revenue excl. VAT","",t.marginRate===null?"":u)}
+  </div>`}var M=760,w=300,b={l:64,r:14,t:26,b:30};function qt(t,e){let n=t.months.length,o=t.months.flatMap((c)=>[c.revenueCents,c.costCents,c.cumulativeMarginCents]),r=lt(Math.min(...o),Math.max(...o),5),s=ut([r.min,r.max],[w-b.b,b.t]),i=(M-b.l-b.r)/n,m=(c)=>b.l+i*(c+0.5),a=Math.max(2,i*0.62),u=s(0),d=r.ticks.map((c)=>`<line x1="${b.l}" x2="${M-b.r}" y1="${s(c)}" y2="${s(c)}" stroke="var(--line)" ${c===0?"":'stroke-dasharray="3 4"'}/>
+      <text x="${b.l-8}" y="${s(c)+4}" text-anchor="end" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">${p(e.moneyShort(c))}</text>`).join(""),y=t.months.map((c,L)=>{let k=u;return[[c.fixedCostCents,"var(--cost-fixed)"],[c.variableCostCents,"var(--cost-variable)"],[c.acquisitionCostCents,"var(--cost-acq)"]].map(([C,I])=>{if(C<=0)return"";let j=u-s(C);return k-=j,`<rect x="${m(L)-a/2}" y="${k}" width="${a}" height="${j}" fill="${I}" opacity=".55"/>`}).join("")}).join(""),v=(c)=>t.months.map((L,k)=>`${k?"L":"M"}${m(k).toFixed(1)},${s(c(k)).toFixed(1)}`).join(" "),h=v((c)=>t.months[c].cumulativeMarginCents),f=`${h} L${m(n-1).toFixed(1)},${u} L${m(0).toFixed(1)},${u} Z`,S=v((c)=>t.months[c].revenueCents),T=[[t.breakEvenMonth,"break-even"],[t.paybackMonth,"payback"]].filter(([c])=>c!==null).map(([c,L],k)=>{let C=m(c-1),I=C>M-120?"end":"start",j=I==="end"?-6:6;return`<line x1="${C}" x2="${C}" y1="${b.t-8}" y2="${w-b.b}" stroke="var(--ink)" stroke-dasharray="2 3"/>
+        <text x="${C+j}" y="${b.t-12+k*13}" text-anchor="${I}" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">${L} · M${c}</text>`}).join(""),U=n<=12?1:n<=24?3:n<=60?6:12,E=t.months.filter((c)=>c.month===1||c.month%U===0).map((c)=>`<text x="${m(c.month-1)}" y="${w-10}" text-anchor="middle" font-family="var(--mono)" font-size="10.5" fill="var(--muted)">M${c.month}</text>`).join("");return`<svg class="chart" id="chart" viewBox="0 0 ${M} ${w}" role="img" aria-label="Monthly revenue, costs and cumulative margin">
+    <defs>
+      <clipPath id="above"><rect x="0" y="0" width="${M}" height="${u}"/></clipPath>
+      <clipPath id="below"><rect x="0" y="${u}" width="${M}" height="${w-u}"/></clipPath>
+    </defs>
+    ${d}${y}
+    <path d="${f}" fill="var(--profit)" opacity=".16" clip-path="url(#above)"/>
+    <path d="${f}" fill="var(--loss)" opacity=".16" clip-path="url(#below)"/>
+    <path d="${h}" fill="none" stroke="var(--profit)" stroke-width="2" clip-path="url(#above)"/>
+    <path d="${h}" fill="none" stroke="var(--loss)" stroke-width="2" clip-path="url(#below)"/>
+    <path d="${S}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="${b.l}" x2="${M-b.r}" y1="${u}" y2="${u}" stroke="var(--muted)"/>
+    ${T}${E}
+    <line id="cross" x1="0" x2="0" y1="${b.t}" y2="${w-b.b}" stroke="var(--accent)" stroke-width="1" visibility="hidden"/>
+    <rect id="hit" x="${b.l}" y="0" width="${M-b.l-b.r}" height="${w}" fill="transparent"/>
+  </svg>`}function Bt(t,e){let n=rt(z(l)),o=t.months[0]?.customers??0,r=t.months.at(-1)?.customers??0,s={now:"background:var(--profit);color:var(--accent-ink)",horizon:"background:var(--profit-soft);color:var(--profit)",beyond:"background:var(--loss-soft);color:var(--loss)",never:"background:var(--sunken);color:var(--muted)"},i=[...n.rows].reverse(),m=i[0].cells.map((u)=>`<th scope="col">${p(e.unitPrice(u.unitPriceCents))}<br><span style="opacity:.7">${pt(u.priceFactor)}</span></th>`).join(""),a=i.map((u)=>`<tr><th scope="row">${e.integer(u.unitsPerCustomer)}<br><span style="opacity:.7">${pt(u.unitsFactor)}</span></th>${u.cells.map((d)=>{let y=mt(d.breakEvenCustomers,o,r),v=d.breakEvenCustomers===null?"—":e.integer(d.breakEvenCustomers),h=d.breakEvenMonth===null?"no turn":`M${d.breakEvenMonth}`,f=`${e.unitPrice(d.unitPriceCents)} per ${l.unit}, ${u.unitsPerCustomer} ${g(l.unit)} per ${l.customer}: ${d.breakEvenCustomers===null?"never breaks even":`${v} ${g(l.customer,d.breakEvenCustomers)} needed, margin turns ${d.breakEvenMonth===null?"not within the horizon":`in month ${d.breakEvenMonth}`}`}. Click to apply.`;return`<td><button type="button" class="${d.isCurrent?"current":""}" style="${s[y]}" data-price="${d.unitPriceCents}" data-units="${u.unitsPerCustomer}" title="${p(f)}" aria-label="${p(f)}">${v}<small>${h}</small></button></td>`}).join("")}</tr>`).join("");return`<div class="heat-wrap"><table class="heat">
+    <thead><tr><th class="corner">${p(F(g(l.unit)))} ↓ · price →</th>${m}</tr></thead>
+    <tbody>${a}</tbody></table></div>
+    <div class="scale-note">
+      <span><i style="background:var(--profit)"></i>covered at the start</span>
+      <span><i style="background:var(--profit-soft)"></i>reached within ${l.months} months</span>
+      <span><i style="background:var(--loss-soft)"></i>not reached</span>
+      <span><i style="background:var(--sunken)"></i>never</span>
+    </div>`}var pt=(t)=>t===1?"now":`${t>1?"+":"−"}${Math.round(Math.abs(t-1)*100)}%`;function Ut(t,e){let n=(r)=>r<0?"neg":r>0?"pos":"",o=t.months.map((r)=>{let s=r.month===t.breakEvenMonth?"break-even":r.month===t.paybackMonth?"payback":"";return`<tr${s?` class="mark" data-mark="${s}"`:""}>
+        <td data-mark="${s}">M${r.month}</td><td>${e.integer(r.customers)}</td><td>${e.integer(r.units)}</td>
+        <td>${e.money(r.revenueCents)}</td><td>${e.money(r.costCents)}</td>
+        <td class="${n(r.marginCents)}">${e.money(r.marginCents)}</td><td class="${n(r.cumulativeMarginCents)}">${e.money(r.cumulativeMarginCents)}</td></tr>`}).join("");return`<div class="table-wrap"><table class="months">
+    <thead><tr><th>Month</th><th>${p(F(g(l.customer)))}</th><th>${p(F(g(l.unit)))}</th><th>Revenue excl. VAT</th><th>Costs</th><th>Margin</th><th>Cumulative</th></tr></thead>
+    <tbody>${o}</tbody></table></div>`}function zt(t,e){let n="",o=t;for(let r of e){let s=o.indexOf(r);if(s<0)continue;n+=p(o.slice(0,s))+`<b>${p(r)}</b>`,o=o.slice(s+r.length)}return n+p(o)}var Ht={"not-a-number":"is not a number","not-an-integer":"must be a whole number","out-of-range":"is out of range",invalid:"is not valid","too-long":"is too long"};function vt(){let t=H(l),e=A(z(l)),n=dt(e,l,t),o={repaid:"pays back",turning:"turning",loss:"loss-making",never:"never profitable"}[n.verdict],r=zt(n.sentence,n.highlights),s=document.getElementById("report");s.innerHTML=`
+    <header class="hero">
+      <div class="hero-top"><span class="verdict ${n.verdict}">${o}</span><span class="note">Prototype · figures are examples until you change them</span></div>
+      <h1>${p(l.title)}</h1>
+      <p aria-live="polite">${r}</p>
+      ${B.length?`<div class="warnings">${B.map((i)=>`<span class="warning">${p(i.param)}=${p(i.value)} ${Ht[i.reason]}; using ${p(String(P[i.param]))}</span>`).join("")}</div>`:""}
+    </header>
+    ${At(e,t)}
+    <section class="card" aria-labelledby="chart-title">
+      <div class="card-head"><h2 id="chart-title">Month by month</h2>
+        <div class="legend">
+          <span><i class="line" style="background:var(--accent)"></i>revenue excl. VAT</span>
+          <span><i style="background:var(--cost-fixed)"></i>fixed</span>
+          <span><i style="background:var(--cost-variable)"></i>variable</span>
+          ${l.cac>0?'<span><i style="background:var(--cost-acq)"></i>acquisition</span>':""}
+          <span><i style="background:var(--profit);opacity:.5"></i>cumulative margin</span>
+        </div></div>
+      <div class="chart-wrap">${qt(e,t)}<div class="tip" id="tip" hidden></div></div>
+    </section>
+    <section class="card" aria-labelledby="heat-title">
+      <div class="card-head"><h2 id="heat-title">What if price or usage moves?</h2><span class="sub">${p(F(g(l.customer)))} needed to cover the fixed costs. Click a cell to apply it.</span></div>
+      ${Bt(e,t)}
+    </section>
+    <section class="card" aria-labelledby="table-title">
+      <div class="card-head"><h2 id="table-title">Monthly table</h2><span class="sub">${l.months} months · ${p(l.currency)}</span></div>
+      ${Ut(e,t)}
+    </section>`,Dt(e,t),document.getElementById("share-link").textContent=gt(),document.querySelectorAll("[data-months]").forEach((i)=>i.setAttribute("aria-pressed",String(Number(i.dataset.months)===l.months)))}function Dt(t,e){let n=document.getElementById("chart"),o=document.getElementById("tip"),r=document.getElementById("cross"),s=(M-b.l-b.r)/t.months.length,i=(m)=>{let a=n.getBoundingClientRect(),u=(m.clientX-a.left)/a.width*M,d=Math.min(t.months.length-1,Math.max(0,Math.floor((u-b.l)/s))),y=t.months[d],v=b.l+s*(d+0.5);r.setAttribute("x1",String(v)),r.setAttribute("x2",String(v)),r.setAttribute("visibility","visible");let h=(f,S,T="")=>`<div class="r"><span>${f}</span><span${T?` style="color:${T}"`:""}>${S}</span></div>`;o.innerHTML=`<b>Month ${y.month}</b>${h(F(g(l.customer)),e.integer(y.customers))}${h("Revenue",e.money(y.revenueCents))}${h("Costs",e.money(y.costCents))}${h("Margin",e.money(y.marginCents))}${h("Cumulative",e.money(y.cumulativeMarginCents))}`,o.hidden=!1,o.style.left=`${v/M*a.width}px`,o.style.top=`${b.t/w*a.height+4}px`};n.addEventListener("pointermove",i),n.addEventListener("pointerdown",i),n.addEventListener("pointerleave",()=>{o.hidden=!0,r.setAttribute("visibility","hidden")})}function gt(){let t=_(l);return t?`/?${t}`:"/"}function ft(){try{history.replaceState(null,"",`${location.pathname}${_(l)?`?${_(l)}`:""}${location.hash}`)}catch{}}function Ot(){let t=H(l);for(let e of yt)for(let n of e.fields){let o=document.querySelector(`[data-label="${n.key}"]`);if(o)o.textContent=n.label(l)}document.querySelectorAll("[data-currency]").forEach((e)=>e.textContent=t.currencySymbol)}function D(t,{relabel:e=!1}={}){if(l={...l,...t},B=B.filter((n)=>!(n.param in t)),e)Ot();vt(),ft()}function X(t,e){let n=document.getElementById(`f-${t}`);if(n)n.value=String(e)}function O(t){let e=document.createElement("div");e.className="toast",e.setAttribute("role","status"),e.textContent=t,document.body.appendChild(e),setTimeout(()=>e.remove(),1800)}async function $t(t,e,n){try{await navigator.clipboard.writeText(t),O(e)}catch{if(n instanceof HTMLTextAreaElement)n.select();else if(n)window.getSelection()?.selectAllChildren(n);O("Press Ctrl+C to copy")}}function ht(t){let e=A(z(l)),n=t==="json"?at(l,e):it(e),o=document.createElement("dialog");o.innerHTML=`<div class="dialog-head"><h3>${p(ct(l,t))}</h3>
+    <div class="dialog-actions"><button type="button" class="btn" data-copy>Copy</button><button type="button" class="btn" data-close>Close</button></div></div>
+    <textarea readonly aria-label="${t.toUpperCase()} export"></textarea>
+    <p class="note">The app downloads this file. The prototype shows it here instead, because the preview frame blocks downloads.</p>`;let r=o.querySelector("textarea");r.value=n,o.querySelector("[data-copy]").addEventListener("click",()=>$t(n,"Copied",r)),o.querySelector("[data-close]").addEventListener("click",()=>o.close()),o.addEventListener("close",()=>o.remove()),document.body.appendChild(o),o.showModal()}function Vt(){let t=document.getElementById("form");t.addEventListener("submit",(e)=>e.preventDefault()),t.addEventListener("input",(e)=>{let n=e.target,o=n.name;if(n.type==="number"){let r=q.find((a)=>a.key===o),s=n.closest(".field"),i=document.getElementById(`${n.id}-err`),m=n.value.trim()===""?{ok:!1,reason:"invalid"}:W(r,n.value);if(!m.ok){s.classList.add("invalid"),n.setAttribute("aria-invalid","true"),i.hidden=!1,i.textContent=n.value.trim()===""?"Required":`Enter a value from ${r.min} to ${r.max.toLocaleString("en")}${r.integer?", whole numbers only":""}`;return}s.classList.remove("invalid"),n.removeAttribute("aria-invalid"),i.hidden=!0,D({[o]:m.value})}else{let r=G(new URLSearchParams({[o]:n.value})).settings[o];D({[o]:n.value.trim()===""?P[o]:r},{relabel:!0})}}),document.querySelectorAll("[data-months]").forEach((e)=>e.addEventListener("click",()=>{let n=Number(e.dataset.months);X("months",n),D({months:n})})),document.getElementById("report").addEventListener("click",(e)=>{let n=e.target.closest("button[data-price]");if(!n)return;let o=tt(Number(n.dataset.price)),r=Number(n.dataset.units);X("price",o),X("units",r),D({price:o,units:r}),O("Scenario applied")}),document.getElementById("copy-link").addEventListener("click",()=>$t(gt(),"Link copied",document.getElementById("share-link"))),document.getElementById("show-json").addEventListener("click",()=>ht("json")),document.getElementById("show-csv").addEventListener("click",()=>ht("csv")),document.getElementById("reset").addEventListener("click",()=>{l={...P},B=[],xt(),ft(),O("Reset to defaults")})}function xt(){let t=H(l);jt.innerHTML=`${_t(t)}<main class="report" id="report"></main>`,Vt(),vt()}xt();})();
+</script>

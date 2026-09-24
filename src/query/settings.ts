@@ -78,7 +78,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   cac: 0,
   months: 24,
   currency: "EUR",
-  locale: "en-BE",
+  locale: "en-IE",
   customer: "customer",
   unit: "unit",
   title: "Rentability",

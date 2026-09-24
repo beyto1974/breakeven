@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "bun test src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:prototype": "bun run scripts/build-prototype.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",
