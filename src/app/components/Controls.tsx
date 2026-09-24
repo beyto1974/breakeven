@@ -30,7 +30,7 @@ const GROUPS: { title: keyof Messages["groups"]; fields: FieldView[] }[] = [
     fields: [
       { key: "units", label: (t, n) => t.units(capitalize(n.unit()), n.customer(1)), average: true, step: "1" },
       { key: "price", label: (t, n) => t.price(n.unit(1)), money: true, step: "0.01" },
-      { key: "subscription", label: (t, n) => t.subscription(n.customer(1)), money: true, average: true, step: "1" },
+      { key: "subscription", label: (t, n) => t.subscription(n.customer(1)), money: true, step: "1" },
       { key: "vat", label: (t) => t.vat, suffix: () => "%", step: "1" },
     ],
   },
@@ -43,6 +43,12 @@ const GROUPS: { title: keyof Messages["groups"]; fields: FieldView[] }[] = [
     ],
   },
 ];
+
+/** The same label a field has in the controls, for other panels that name it. */
+export function fieldLabel(key: NumericKey, t: Messages, noun: Nouns): string {
+  const field = GROUPS.flatMap((g) => g.fields).find((f) => f.key === key);
+  return field ? field.label(t.fields, noun) : key;
+}
 
 const MONTHS_FIELD: FieldView = { key: "months", label: (t) => t.months, suffix: (t) => t.monthsSuffix, step: "1" };
 

@@ -95,6 +95,25 @@ export interface Messages {
     turnsRepaid(turn: string, repaid: string): string;
     turnsNotRepaid(turn: string, horizon: string): string;
   };
+  target: {
+    title: string;
+    intro: string;
+    open: string;
+    close: string;
+    goal: string;
+    goals: { breakeven: string; payback: string; margin: string };
+    month: string;
+    amount: string;
+    solveFor: string;
+    mustRise(label: string, value: string, current: string, change: string): string;
+    canDrop(label: string, value: string, current: string, change: string): string;
+    mustFall(label: string, value: string, current: string, change: string): string;
+    canRise(label: string, value: string, current: string, change: string): string;
+    unreachable(label: string, min: string, max: string): string;
+    apply(value: string): string;
+    applied: string;
+    beyondHorizon(month: number, months: number): string;
+  };
   footnote: string;
 }
 
@@ -201,6 +220,25 @@ const en: Messages = {
     positiveFrom: (m) => `The margin is positive from ${m}.`,
     turnsRepaid: (t, r) => `The margin turns in ${t} and the early losses are repaid in ${r}.`,
     turnsNotRepaid: (t, h) => `The margin turns in ${t}, but the early losses are not repaid within ${h}.`,
+  },
+  target: {
+    title: "Reach a target",
+    intro: "Pick a goal and one assumption; the solver finds the value that just meets it, all else unchanged.",
+    open: "Set a target",
+    close: "Close",
+    goal: "Goal",
+    goals: { breakeven: "Break-even by month", payback: "Losses repaid by month", margin: "Total margin over the horizon" },
+    month: "Month",
+    amount: "Margin",
+    solveFor: "Solve for",
+    mustRise: (l, v, c, d) => `${l} must rise to at least ${v} (now ${c}, ${d}).`,
+    canDrop: (l, v, c, d) => `Already met. ${l} can drop to ${v} (now ${c}, ${d}) and still meet it.`,
+    mustFall: (l, v, c, d) => `${l} must fall to at most ${v} (now ${c}, ${d}).`,
+    canRise: (l, v, c, d) => `Already met. ${l} can rise to ${v} (now ${c}, ${d}) and still meet it.`,
+    unreachable: (l, min, max) => `No value of ${l.toLowerCase()} from ${min} to ${max} meets this goal. Try another assumption.`,
+    apply: (v) => `Apply ${v}`,
+    applied: "Target applied",
+    beyondHorizon: (m, h) => `Month ${m} is beyond the ${h}-month horizon; any month inside it counts.`,
   },
   footnote: "A projection, not a forecast. Prices include VAT, which is taken out of revenue; costs are counted in full. Payment fees are not included.",
 };
@@ -309,6 +347,25 @@ const nl: Messages = {
     turnsRepaid: (t, r) => `De marge wordt positief in ${t} en de aanloopverliezen zijn terugverdiend in ${r}.`,
     turnsNotRepaid: (t, h) => `De marge wordt positief in ${t}, maar de aanloopverliezen zijn niet terugverdiend binnen ${h}.`,
   },
+  target: {
+    title: "Een doel bereiken",
+    intro: "Kies een doel en één aanname; de solver zoekt de waarde die het doel net haalt, al de rest ongewijzigd.",
+    open: "Doel instellen",
+    close: "Sluiten",
+    goal: "Doel",
+    goals: { breakeven: "Break-even tegen maand", payback: "Verliezen terugverdiend tegen maand", margin: "Totale marge over de periode" },
+    month: "Maand",
+    amount: "Marge",
+    solveFor: "Oplossen voor",
+    mustRise: (l, v, c, d) => `${l} moet stijgen tot minstens ${v} (nu ${c}, ${d}).`,
+    canDrop: (l, v, c, d) => `Al gehaald. ${l} mag dalen tot ${v} (nu ${c}, ${d}) en haalt het doel nog.`,
+    mustFall: (l, v, c, d) => `${l} moet dalen tot hoogstens ${v} (nu ${c}, ${d}).`,
+    canRise: (l, v, c, d) => `Al gehaald. ${l} mag stijgen tot ${v} (nu ${c}, ${d}) en haalt het doel nog.`,
+    unreachable: (l, min, max) => `Geen enkele waarde voor ${l.toLowerCase()} van ${min} tot ${max} haalt dit doel. Probeer een andere aanname.`,
+    apply: (v) => `${v} toepassen`,
+    applied: "Doel toegepast",
+    beyondHorizon: (m, h) => `Maand ${m} ligt voorbij de periode van ${h} maanden; elke maand binnen de periode telt.`,
+  },
   footnote: "Een projectie, geen voorspelling. Prijzen zijn inclusief btw, die van de omzet wordt afgetrokken; kosten tellen volledig. Betaalkosten zijn niet meegerekend.",
 };
 
@@ -415,6 +472,25 @@ const fr: Messages = {
     positiveFrom: (m) => `La marge est positive dès le ${m}.`,
     turnsRepaid: (t, r) => `La marge devient positive au ${t} et les pertes de départ sont remboursées au ${r}.`,
     turnsNotRepaid: (t, h) => `La marge devient positive au ${t}, mais les pertes de départ ne sont pas remboursées en ${h}.`,
+  },
+  target: {
+    title: "Atteindre un objectif",
+    intro: "Choisissez un objectif et une hypothèse ; le solveur trouve la valeur qui l'atteint tout juste, le reste inchangé.",
+    open: "Fixer un objectif",
+    close: "Fermer",
+    goal: "Objectif",
+    goals: { breakeven: "Seuil atteint au mois", payback: "Pertes remboursées au mois", margin: "Marge totale sur l'horizon" },
+    month: "Mois",
+    amount: "Marge",
+    solveFor: "Résoudre pour",
+    mustRise: (l, v, c, d) => `${l} doit monter à au moins ${v} (actuellement ${c}, ${d}).`,
+    canDrop: (l, v, c, d) => `Déjà atteint. ${l} peut descendre à ${v} (actuellement ${c}, ${d}) sans manquer l'objectif.`,
+    mustFall: (l, v, c, d) => `${l} doit descendre à au plus ${v} (actuellement ${c}, ${d}).`,
+    canRise: (l, v, c, d) => `Déjà atteint. ${l} peut monter à ${v} (actuellement ${c}, ${d}) sans manquer l'objectif.`,
+    unreachable: (l, min, max) => `Aucune valeur de ${l.toLowerCase()} entre ${min} et ${max} n'atteint cet objectif. Essayez une autre hypothèse.`,
+    apply: (v) => `Appliquer ${v}`,
+    applied: "Objectif appliqué",
+    beyondHorizon: (m, h) => `Le mois ${m} dépasse l'horizon de ${h} mois ; tout mois dans l'horizon compte.`,
   },
   footnote: "Une projection, pas une prévision. Les prix sont TVAC, la TVA est retirée des recettes ; les coûts sont comptés en entier. Les frais de paiement ne sont pas inclus.",
 };

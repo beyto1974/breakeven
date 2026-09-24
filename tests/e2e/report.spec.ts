@@ -39,7 +39,7 @@ test.describe("report", () => {
 
   test("every model input is required and numeric", async ({ page }) => {
     await page.goto("/?lang=en");
-    const inputs = page.locator('form input[type="number"]');
+    const inputs = page.locator('.rail-form input[type="number"]');
     await expect(inputs).toHaveCount(11);
     for (const input of await inputs.all()) {
       await expect(input).toHaveAttribute("required", "");
@@ -119,5 +119,29 @@ test.describe("server", () => {
     const response = await request.get("/healthz");
     expect(response.status()).toBe(200);
     expect(await response.json()).toEqual({ status: "ok" });
+  });
+});
+
+test.describe("target solver", () => {
+  test("opens, solves for price, and applies the answer", async ({ page }) => {
+    await page.goto("/?lang=en");
+    await page.getByRole("button", { name: "Set a target" }).click();
+    await expect(page).toHaveURL(/goal=breakeven/);
+    await page.getByLabel("Month", { exact: true }).fill("6");
+    await expect(page.getByTestId("target-answer")).toHaveText("Price per unit, VAT incl. must rise to at least €0.2768 (now €0.25, +10.7%).");
+    await page.getByRole("button", { name: "Apply €0.2768" }).click();
+    await expect(page).toHaveURL(/price=0\.2768/);
+    await expect(page.getByTestId("summary")).toContainText("The margin turns in month 6");
+  });
+
+  test("reads the goal from the URL and says when there is room", async ({ page }) => {
+    await page.goto("/?lang=en&goal=payback&goalMonth=20&solve=fixed");
+    await expect(page.getByTestId("target-answer")).toContainText("Already met. Fixed costs per month can rise to");
+  });
+
+  test("closing the solver removes it from the URL", async ({ page }) => {
+    await page.goto("/?lang=en&goal=margin&goalMargin=5000");
+    await page.getByRole("button", { name: "Close" }).click();
+    await expect(page).not.toHaveURL(/goal/);
   });
 });

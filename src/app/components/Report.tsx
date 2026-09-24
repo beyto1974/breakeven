@@ -10,12 +10,14 @@ import { LANGS, type Lang } from "@/i18n/lang";
 import { messages } from "@/i18n/messages";
 import { capitalize, nouns } from "@/i18n/nouns";
 import { summarize } from "@/report/summary";
+import { solveTarget } from "@/report/target";
 import { defaultsFor, parseSettings, serializeSettings, switchLang, toProjectionInput, type NumericKey, type TextKey } from "@/query/settings";
 import { Controls } from "./Controls";
 import { Kpis } from "./Kpis";
 import { MonthlyTable } from "./MonthlyTable";
 import { ProjectionChart } from "./ProjectionChart";
 import { SensitivityGrid } from "./SensitivityGrid";
+import { TargetSolver } from "./TargetSolver";
 import { useUrlSettings } from "./useUrlSettings";
 
 /** Escapes nothing (React does); splits the sentence around each highlighted figure, in order. */
@@ -55,6 +57,7 @@ export function Report() {
   const projection = useMemo(() => project(input), [input]);
   const grid = useMemo(() => sensitivity(input), [input]);
   const summary = summarize(projection, settings, fmt);
+  const target = useMemo(() => solveTarget(settings), [settings]);
   const query = serializeSettings(settings);
 
   useEffect(() => {
@@ -166,6 +169,19 @@ export function Report() {
         </header>
 
         <Kpis projection={projection} months={settings.months} t={t} fmt={fmt} noun={noun} />
+
+        <TargetSolver
+          settings={settings}
+          result={target}
+          t={t}
+          fmt={fmt}
+          noun={noun}
+          onChange={update}
+          onApply={(key, value) => {
+            update({ [key]: value });
+            say(t.target.applied);
+          }}
+        />
 
         <section className="card" aria-labelledby="chart-title">
           <div className="card-head">

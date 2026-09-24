@@ -15,6 +15,8 @@ describe("createFormatter", () => {
 
   test("formats integers and percentages", () => {
     expect(f.integer(12345)).toBe("12,345");
+    expect(f.decimal(2.456)).toBe("2.46");
+    expect(f.decimal(3)).toBe("3");
     expect(f.percent(0.18095)).toBe("18.1%");
     expect(f.percent(null)).toBe("—");
   });

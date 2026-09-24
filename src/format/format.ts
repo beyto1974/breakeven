@@ -10,6 +10,8 @@ export interface Formatter {
   /** Up to four decimals, for per-unit prices that may be below a cent. */
   unitPrice(cents: number): string;
   integer(value: number): string;
+  /** Up to two decimals, for counts and rates that may be fractional. */
+  decimal(value: number): string;
   /** A ratio (0.18 → 18 %), or a dash when there is none. */
   percent(ratio: number | null): string;
   currencySymbol: string;
@@ -28,12 +30,15 @@ export function createFormatter({ locale, currency }: { locale: string; currency
   const full = currencyFormat(locale, currency, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const unit = currencyFormat(locale, currency, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
   let integer: Intl.NumberFormat;
+  let decimal: Intl.NumberFormat;
   let percent: Intl.NumberFormat;
   try {
     integer = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+    decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
     percent = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 });
   } catch {
     integer = new Intl.NumberFormat("en", { maximumFractionDigits: 0 });
+    decimal = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
     percent = new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 1 });
   }
   const symbol = full.formatToParts(0).find((part) => part.type === "currency")?.value ?? currency;
@@ -43,6 +48,7 @@ export function createFormatter({ locale, currency }: { locale: string; currency
     money: (cents) => full.format(Math.round(cents) / 100),
     unitPrice: (cents) => unit.format(cents / 100),
     integer: (value) => integer.format(value),
+    decimal: (value) => decimal.format(value),
     percent: (ratio) => (ratio === null ? "—" : percent.format(ratio)),
     currencySymbol: symbol,
   };
