@@ -2,7 +2,7 @@
 
 ## Phase 0 — Scaffold
 - [x] git init, docs skeleton
-- [ ] Spec artifact (design + query contract) for approval
+- [x] Spec artifact (design + query contract) — awaiting approval
 
 ## Phase 1 — Engine (TDD)
 - [ ] Money + VAT helpers

@@ -1,0 +1,291 @@
+<title>Rentability Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --ink:#101828; --muted:#5B6576; --line:#DDE2EA;
+  --accent:#3A4BE0; --accent-soft:#E6E9FC; --profit:#0E9F6E; --loss:#D93F55; --warn:#B7791F;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0C1220; --surface:#141B2D; --ink:#E7ECF5; --muted:#98A2B6; --line:#26304A;
+    --accent:#8C9BFF; --accent-soft:#1F2850; --profit:#34D399; --loss:#FF6B81; --warn:#F6C35B;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0C1220; --surface:#141B2D; --ink:#E7ECF5; --muted:#98A2B6; --line:#26304A;
+  --accent:#8C9BFF; --accent-soft:#1F2850; --profit:#34D399; --loss:#FF6B81; --warn:#F6C35B;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--body);padding:0 16px}
+main{max-width:1040px;margin:0 auto;padding-block:40px 80px;display:grid;gap:56px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(34px,6vw,56px);font-weight:700;letter-spacing:-.02em}
+h2{font-size:26px;font-weight:700}
+h3{font-size:17px;font-weight:600;font-family:var(--body)}
+p{margin:0;max-width:65ch}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lede{font-size:18px;color:var(--muted)}
+section{display:grid;gap:20px}
+.hero{display:grid;gap:18px}
+.hero .thesis{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.chip{font:500 13px/1 var(--mono);padding:8px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.chip.ok{background:color-mix(in srgb,var(--profit) 14%,transparent);color:var(--profit)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.artefact{display:grid;gap:10px;align-content:start}
+.artefact .n{font:500 12px/1 var(--mono);color:var(--muted)}
+.artefact .state{justify-self:start;font:500 12px/1 var(--mono);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
+.artefact .state.now{border-color:var(--accent);color:var(--accent)}
+.muted{color:var(--muted)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 12px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--bg) 60%,var(--surface))}
+tr:last-child td{border-bottom:0}
+td code,code{font:13px/1.4 var(--mono);color:var(--accent)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+pre{margin:0;font:13px/1.7 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;overflow-x:auto;color:var(--ink)}
+pre .c{color:var(--muted)}
+.url{font:13px/1.6 var(--mono);word-break:break-all;background:var(--surface);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px}
+.url b{color:var(--accent);font-weight:500}
+/* wireframe */
+.wire{display:grid;grid-template-columns:260px 1fr;gap:14px}
+.wire .rail,.wire .box{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px;font:12px/1.5 var(--mono);color:var(--muted)}
+.wire .rail{display:grid;gap:10px;align-content:start}
+.wire .rail span{display:block;border-bottom:1px dashed var(--line);padding-bottom:8px}
+.wire .main{display:grid;gap:14px}
+.wire .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wire .kpis .box b{display:block;font:600 18px/1.2 var(--display);color:var(--ink)}
+.wire .tall{min-height:0}
+@media (max-width:760px){.wire{grid-template-columns:1fr}.wire .kpis{grid-template-columns:repeat(2,1fr)}}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font:12px/1 var(--mono);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sw{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.sw div{height:54px}
+.sw p{font:12px/1.4 var(--mono);padding:8px 10px;color:var(--muted)}
+.types{display:grid;gap:10px}
+.types div{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px}
+.types small{font:12px/1 var(--mono);color:var(--muted);min-width:120px}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:6px;max-width:70ch}
+.na td:first-child{white-space:nowrap}
+.ask{border-left:3px solid var(--accent);padding:4px 0 4px 16px;display:grid;gap:8px}
+</style>
+
+<main>
+  <header class="hero">
+    <span class="eyebrow">Artefact 1 of 3 · Design &amp; contract</span>
+    <h1>How many customers pay the rent?</h1>
+    <p class="lede">A general-purpose version of an internal profitability simulator. The report takes a handful of assumptions about customers, usage, price and costs. It answers three questions: how many customers cover the fixed costs, in which month the margin turns positive, and when the early losses are paid back. Every setting lives in the URL, so a link is the whole report.</p>
+    <div class="thesis">
+      <span class="chip">stateless</span><span class="chip">query string = state</span><span class="chip">server-rendered</span><span class="chip ok">integer cents</span>
+    </div>
+  </header>
+
+  <section>
+    <span class="eyebrow">The three artefacts</span>
+    <h2>What gets delivered, and when</h2>
+    <div class="grid3">
+      <div class="panel artefact">
+        <span class="n">1 · now</span>
+        <h3>Blueprint</h3>
+        <p class="muted">This page. It sets out the model, the query contract, the layout and the design tokens. Approve or amend it before any UI is built.</p>
+        <span class="state now">you are here</span>
+      </div>
+      <div class="panel artefact">
+        <span class="n">2 · after the engine</span>
+        <h3>Live prototype</h3>
+        <p class="muted">A single-page interactive report that runs the real engine in the browser. Use it to review the look and the numbers before the app is wired up.</p>
+        <span class="state">phase 2</span>
+      </div>
+      <div class="panel artefact">
+        <span class="n">3 · at the end</span>
+        <h3>Review report</h3>
+        <p class="muted">What was built and what each phase review found. It covers test coverage, logs and trace ids, the Docker setup and what remains in TODO.md.</p>
+        <span class="state">phase 4</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">The model</span>
+    <h2>One month, repeated</h2>
+    <p>This is the reference simulator's arithmetic with a generic vocabulary: a <em>customer</em> buys <em>units</em>, and both nouns can be renamed through the URL. Two optional revenue and cost lines are added: a flat subscription per customer, and an acquisition cost per new customer. All money is held as integer cents. Prices include VAT, so VAT is taken out of revenue and never out of costs.</p>
+<pre><span class="c">// per month m = 1..months</span>
+units        = round(customers × unitsPerCustomer)
+revenue      = units × net(price) + round(customers) × net(subscription)
+variableCost = units × variable
+acquisition  = newCustomers(m) × cac          <span class="c">// month 1 buys no one</span>
+margin       = revenue − variableCost − acquisition − fixed
+cumulative  += margin
+customers    = customers × (1 − churn%) + growth   <span class="c">// kept fractional, rounded for display</span>
+
+net(gross)          = floor(gross / (1 + vat%))
+contribution        = unitsPerCustomer × (net(price) − variable) + net(subscription)
+breakEvenCustomers  = contribution ≤ 0 ? never : ceil(fixed / contribution)
+breakEvenMonth      = first m with margin ≥ 0
+paybackMonth        = first m ≥ breakEvenMonth with cumulative ≥ 0
+marginRate          = totalMargin / totalRevenue        <span class="c">// new; the reference has no margin %</span></pre>
+    <div class="panel">
+      <div class="legend" style="margin-bottom:10px">
+        <span><i style="background:var(--accent)"></i>revenue excl. VAT</span>
+        <span><i style="background:var(--loss)"></i>costs</span>
+        <span><i style="background:var(--profit)"></i>cumulative margin</span>
+      </div>
+      <svg id="demo" class="chart" viewBox="0 0 720 240" role="img" aria-label="Sample projection with default settings over 24 months"></svg>
+      <p class="muted" style="margin-top:8px;font-size:13px">Defaults below over 24 months. Break-even month and payback month are marked on the chart. The figures are computed live on this page from the formulas above.</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Query contract</span>
+    <h2>The URL is the report</h2>
+    <p>Values are parsed with defaults and clamped to their range. Anything out of range or not a number falls back to its default, and a warning chip appears on the report. When a link is shared, only the values that differ from the defaults are written, so the default report is just <code>/</code>. Money is written in major units in the URL, for example <code>price=0.25</code>, and converted to cents at parse time.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Param</th><th>Meaning</th><th>Default</th><th>Range</th></tr></thead>
+        <tbody>
+          <tr><td><code>customers</code></td><td>Paying customers at month 1</td><td class="num">15</td><td class="num">0 – 1 000 000</td></tr>
+          <tr><td><code>growth</code></td><td>New customers per month</td><td class="num">3</td><td class="num">0 – 100 000</td></tr>
+          <tr><td><code>churn</code></td><td>Customers lost per month, %</td><td class="num">2</td><td class="num">0 – 100</td></tr>
+          <tr><td><code>units</code></td><td>Units per customer per month</td><td class="num">40</td><td class="num">0 – 1 000 000</td></tr>
+          <tr><td><code>price</code></td><td>Price per unit, VAT included</td><td class="num">0.25</td><td class="num">0 – 1 000 000</td></tr>
+          <tr><td><code>subscription</code></td><td>Flat fee per customer per month, VAT included</td><td class="num">0</td><td class="num">0 – 1 000 000</td></tr>
+          <tr><td><code>vat</code></td><td>VAT included in prices, %</td><td class="num">21</td><td class="num">0 – 100</td></tr>
+          <tr><td><code>variable</code></td><td>Cost per unit</td><td class="num">0.05</td><td class="num">0 – 1 000 000</td></tr>
+          <tr><td><code>fixed</code></td><td>Fixed costs per month</td><td class="num">200</td><td class="num">0 – 100 000 000</td></tr>
+          <tr><td><code>cac</code></td><td>Acquisition cost per new customer</td><td class="num">0</td><td class="num">0 – 1 000 000</td></tr>
+          <tr><td><code>months</code></td><td>Horizon; presets 12 / 24 / 36 / 60</td><td class="num">24</td><td class="num">1 – 120</td></tr>
+          <tr><td><code>currency</code></td><td>ISO 4217 code</td><td class="num">EUR</td><td>any valid code</td></tr>
+          <tr><td><code>locale</code></td><td>Number and date formatting</td><td class="num">en-BE</td><td>BCP 47 tag</td></tr>
+          <tr><td><code>customer</code> / <code>unit</code></td><td>Nouns used in labels, for example <code>company</code> / <code>work order</code></td><td class="num">customer / unit</td><td class="num">1 – 32 chars</td></tr>
+          <tr><td><code>title</code></td><td>Report heading</td><td class="num">Rentability</td><td class="num">1 – 80 chars</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">The reference setup (12 companies, 2 new a month, orders at €0.25) as a link. Every other value is already a default, so it is left out:</p>
+    <div class="url">/?customers=<b>12</b>&amp;growth=<b>2</b>&amp;customer=<b>company</b>&amp;unit=<b>order</b></div>
+    <p class="muted">The same query string works for <code>GET /api/projection</code>, which returns the full projection as JSON, and <code>GET /api/projection.csv</code>, which returns the monthly table.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Layout</span>
+    <h2>Controls on the left, answer on the right</h2>
+    <p>Editing a field updates the URL with <code>router.replace</code> and recalculates right away. The page is also fully rendered on the server from the query, so it works without JavaScript and in a shared link preview.</p>
+    <div class="wire" aria-hidden="true">
+      <div class="rail">
+        <span>Customers · start, growth, churn</span>
+        <span>Usage &amp; price · units, price, subscription, VAT</span>
+        <span>Costs · variable, fixed, acquisition</span>
+        <span>Horizon · 12 / 24 / 36 / 60</span>
+        <span>Labels · currency, nouns</span>
+        <span style="border:0">Copy link · JSON · CSV · reset</span>
+      </div>
+      <div class="main">
+        <div class="box" style="color:var(--ink);font:600 16px/1.4 var(--display)">Break-even at 34 customers · month 9 · paid back in month 16</div>
+        <div class="kpis">
+          <div class="box">threshold<b>34</b></div>
+          <div class="box">first profitable<b>M9</b></div>
+          <div class="box">margin, 24 m<b>€ 1 239</b></div>
+          <div class="box">margin rate<b>15 %</b></div>
+        </div>
+        <div class="box" style="min-height:120px">Chart · stacked cost bars, revenue line, cumulative margin area, zero line, markers</div>
+        <div class="box" style="min-height:90px">Sensitivity · price × units per customer heatmap of break-even customers (±50 %, 7 × 7)</div>
+        <div class="box" style="min-height:70px">Monthly table · month, customers, units, revenue, costs, margin, cumulative</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Design tokens</span>
+    <h2>Ledger blue, with profit and loss kept apart</h2>
+    <p>The accent colour is used only for controls and the revenue line. Green and red are reserved for margin, and they never mean anything else. Both colour themes are designed, and the page follows the system theme.</p>
+    <div class="swatches">
+      <div class="sw"><div style="background:var(--bg);border-bottom:1px solid var(--line)"></div><p>ground<br>#F4F6F9 · #0C1220</p></div>
+      <div class="sw"><div style="background:var(--ink)"></div><p>ink<br>#101828 · #E7ECF5</p></div>
+      <div class="sw"><div style="background:var(--accent)"></div><p>accent<br>#3A4BE0 · #8C9BFF</p></div>
+      <div class="sw"><div style="background:var(--profit)"></div><p>profit<br>#0E9F6E · #34D399</p></div>
+      <div class="sw"><div style="background:var(--loss)"></div><p>loss<br>#D93F55 · #FF6B81</p></div>
+    </div>
+    <div class="panel types">
+      <div><small>display</small><span style="font:700 28px/1.1 var(--display)">Bricolage Grotesque</span></div>
+      <div><small>body</small><span style="font:400 17px/1.4 var(--body)">Instrument Sans for labels and prose</span></div>
+      <div style="border:0;padding:0"><small>figures</small><span style="font:500 17px/1.4 var(--mono);font-variant-numeric:tabular-nums">JetBrains Mono · € 1 239,15</span></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Stack &amp; standing specs</span>
+    <h2>Stack</h2>
+    <ul class="plain">
+      <li>Next.js 16 on Bun with Tailwind v4, shadcn primitives and Recharts; unit tests with <code>bun test</code>, end-to-end tests with Playwright. TDD for the engine and the query codec.</li>
+      <li>SOLID layout. <code>domain/</code> holds the pure engine, <code>query/</code> the parse and serialize codec, <code>server/</code> the logger and trace id, and <code>app/</code> the UI and API. The UI depends on the engine's types and nothing else.</li>
+      <li>One JSON object per log line, with the level set by <code>LOG_LEVEL</code> in <code>.env</code>. Each request gets an <code>x-trace-id</code>: an inbound id is kept if it passes sanitising, otherwise a new one is minted. The id goes into every log line and onto the response.</li>
+      <li>Docker multi-stage image with a standalone build, a compose file with a healthcheck, and the port taken from <code>freeport</code> in development.</li>
+      <li>README.md, CLAUDE.md and TODO.md, all in English. One commit per iteration, and a review after each phase.</li>
+    </ul>
+    <div class="scroll na">
+      <table>
+        <thead><tr><th>Spec</th><th>Status in this project</th></tr></thead>
+        <tbody>
+          <tr><td>S3 storage</td><td>Not applicable. The app stores nothing, because the URL holds all the state. No bucket is requested.</td></tr>
+          <tr><td>Themed HTML mails</td><td>Not applicable. There are no accounts and no mail flows. If "email this report" is wanted later, it will use themed HTML and Mailpit in development.</td></tr>
+          <tr><td>OTP numeric input</td><td>Not applicable, because there is no login. All numeric fields use <code>type="number"</code> with <code>inputmode="decimal"</code>.</td></tr>
+          <tr><td><code>required</code> attribute</td><td>Applied to every model input, since none of them may be empty. The label fields are optional.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ask">
+    <span class="eyebrow">Decisions to confirm</span>
+    <p><strong>Additions beyond the reference:</strong> the subscription fee, acquisition cost, margin rate, sensitivity heatmap, and JSON and CSV output. Any of them can be dropped.</p>
+    <p><strong>Access:</strong> the report is public, with no login. The reference page is internal-only, and a generic tool has nothing to protect.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+  var d={customers:15,growth:3,churn:2,units:40,price:25,subscription:0,vat:21,variable:5,fixed:20000,cac:0,months:24};
+  function net(g,v){return v>0?Math.floor(Math.round(g)/(1+v/100)):Math.round(g)}
+  var c=d.customers,cum=0,rows=[],be=null,pb=null,p=net(d.price,d.vat);
+  for(var m=1;m<=d.months;m++){
+    var u=Math.round(c*d.units),rev=u*p,cost=u*d.variable+d.fixed,mar=rev-cost;cum+=mar;
+    if(be===null&&mar>=0)be=m; if(pb===null&&be!==null&&cum>=0)pb=m;
+    rows.push({m:m,rev:rev,cost:cost,cum:cum}); c=c*(1-d.churn/100)+d.growth;
+  }
+  var svg=document.getElementById('demo'),W=720,H=240,L=56,R=12,T=14,B=28;
+  var vals=[];rows.forEach(function(r){vals.push(r.rev,r.cost,r.cum)});
+  var max=Math.max.apply(null,vals),min=Math.min(0,Math.min.apply(null,vals));
+  var step=niceStep((max-min)/4);max=Math.ceil(max/step)*step;min=Math.floor(min/step)*step;
+  function x(i){return L+(W-L-R)*(i+0.5)/rows.length}
+  function y(v){return T+(H-T-B)*(max-v)/(max-min)}
+  function niceStep(r){var e=Math.pow(10,Math.floor(Math.log10(r))),f=r/e;return (f<=1?1:f<=2?2:f<=5?5:10)*e}
+  var ns='http://www.w3.org/2000/svg',out='';
+  for(var v=min;v<=max+1;v+=step){
+    out+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)" stroke-width="1"'+(v===0?' stroke-dasharray="0"':' stroke-dasharray="3 4"')+'/>';
+    out+='<text x="'+(L-8)+'" y="'+(y(v)+4)+'" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--muted)">€'+Math.round(v/100)+'</text>';
+  }
+  var bw=(W-L-R)/rows.length*0.56;
+  rows.forEach(function(r,i){out+='<rect x="'+(x(i)-bw/2)+'" y="'+y(r.cost)+'" width="'+bw+'" height="'+(y(0)-y(r.cost))+'" rx="2" fill="var(--loss)" opacity=".28"/>'});
+  var area='M'+x(0)+','+y(0);rows.forEach(function(r,i){area+=' L'+x(i)+','+y(r.cum)});area+=' L'+x(rows.length-1)+','+y(0)+' Z';
+  out+='<path d="'+area+'" fill="var(--profit)" opacity=".14"/>';
+  var cl='';rows.forEach(function(r,i){cl+=(i?' L':'M')+x(i)+','+y(r.cum)});
+  out+='<path d="'+cl+'" fill="none" stroke="var(--profit)" stroke-width="2"/>';
+  var rl='';rows.forEach(function(r,i){rl+=(i?' L':'M')+x(i)+','+y(r.rev)});
+  out+='<path d="'+rl+'" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>';
+  out+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(0)+'" y2="'+y(0)+'" stroke="var(--muted)" stroke-width="1"/>';
+  [[be,'break-even'],[pb,'payback']].forEach(function(k){ if(!k[0])return; var xi=x(k[0]-1);
+    out+='<line x1="'+xi+'" x2="'+xi+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--ink)" stroke-width="1" stroke-dasharray="2 3"/>';
+    out+='<text x="'+(xi+5)+'" y="'+(T+10)+'" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--ink)">'+k[1]+' M'+k[0]+'</text>'; });
+  rows.forEach(function(r,i){ if(i%3===0||i===rows.length-1) out+='<text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="var(--muted)">M'+r.m+'</text>'});
+  svg.innerHTML=out;
+})();
+</script>
