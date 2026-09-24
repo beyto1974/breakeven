@@ -29,6 +29,10 @@ describe("parseSettings", () => {
       customerPlural: "",
       unitPlural: "",
       title: "Rentability",
+      goal: "",
+      goalMonth: 12,
+      goalMargin: 10000,
+      solve: "price",
     });
   });
 
@@ -199,5 +203,42 @@ describe("language", () => {
     const switched = switchLang({ ...DEFAULT_SETTINGS, unitPlural: "units!" }, "fr");
     expect(switched.unit).toBe("unité");
     expect(switched.unitPlural).toBe("");
+  });
+});
+
+describe("target solver params", () => {
+  test("reads a goal, its value and the assumption to solve for", () => {
+    const { settings, warnings } = parseSettings(new URLSearchParams("goal=payback&goalMonth=18&solve=churn"));
+    expect(settings).toMatchObject({ goal: "payback", goalMonth: 18, solve: "churn" });
+    expect(warnings).toEqual([]);
+  });
+
+  test("rejects an unknown goal or a variable the solver cannot move", () => {
+    const { settings, warnings } = parseSettings(new URLSearchParams("goal=fame&solve=vat"));
+    expect(settings.goal).toBe("");
+    expect(settings.solve).toBe("price");
+    expect(warnings.map((w) => [w.param, w.reason])).toEqual([
+      ["goal", "invalid"],
+      ["solve", "invalid"],
+    ]);
+  });
+
+  test("a margin goal may be negative: limiting a loss is a goal too", () => {
+    expect(parseSettings(new URLSearchParams("goal=margin&goalMargin=-500")).settings.goalMargin).toBe(-500);
+  });
+
+  test("writes the goal block last, and only the value that goal uses", () => {
+    const settings = { ...DEFAULT_SETTINGS, fixed: 300, goal: "breakeven" as const, goalMonth: 6, goalMargin: 999, solve: "growth" as const };
+    expect(serializeSettings(settings)).toBe("fixed=300&goal=breakeven&goalMonth=6&solve=growth");
+    expect(serializeSettings({ ...settings, goal: "margin" })).toBe("fixed=300&goal=margin&goalMargin=999&solve=growth");
+  });
+
+  test("writes nothing about the solver while no goal is set", () => {
+    expect(serializeSettings({ ...DEFAULT_SETTINGS, goalMonth: 6, solve: "fixed" })).toBe("");
+  });
+
+  test("round-trips an open solver", () => {
+    const settings = { ...defaultsFor("nl"), goal: "margin" as const, goalMargin: 25_000.5, solve: "subscription" as const };
+    expect(parseSettings(new URLSearchParams(serializeSettings(settings))).settings).toEqual(settings);
   });
 });

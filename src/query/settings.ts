@@ -29,10 +29,28 @@ export interface Settings {
   customerPlural: string;
   unitPlural: string;
   title: string;
+  /** Target solver: which goal, if any. Empty means the solver is closed. */
+  goal: GoalKind | "";
+  /** Month for a break-even or payback goal. */
+  goalMonth: number;
+  /** Total margin for a margin goal, major units. */
+  goalMargin: number;
+  /** The assumption the solver moves. */
+  solve: SolvableKey;
 }
 
+export const GOAL_KINDS = ["breakeven", "payback", "margin"] as const;
+export type GoalKind = (typeof GOAL_KINDS)[number];
+
+/** Assumptions the solver can move. VAT and the horizon are facts, not levers. */
+export const SOLVABLE_KEYS = ["price", "units", "subscription", "customers", "growth", "churn", "variable", "fixed", "cac"] as const;
+export type SolvableKey = (typeof SOLVABLE_KEYS)[number];
+
+/** Only meaningful while a goal is set; never written without one. */
+const GOAL_FIELDS = new Set<keyof Settings>(["goalMonth", "goalMargin", "solve"]);
+
 export type NumericKey = { [K in keyof Settings]: Settings[K] extends number ? K : never }[keyof Settings];
-export type TextKey = Exclude<keyof Settings, NumericKey | "lang">;
+export type TextKey = Exclude<keyof Settings, NumericKey | "lang" | "goal" | "solve">;
 
 export type WarningReason = "not-a-number" | "not-an-integer" | "out-of-range" | "invalid" | "too-long";
 
@@ -64,6 +82,8 @@ export const NUMERIC_FIELDS: readonly NumericField[] = [
   { key: "fixed", min: 0, max: 100_000_000, money: true },
   { key: "cac", min: 0, max: 1_000_000, money: true },
   { key: "months", min: 1, max: 120, integer: true },
+  { key: "goalMonth", min: 1, max: 120, integer: true },
+  { key: "goalMargin", min: -1_000_000_000, max: 1_000_000_000, money: true },
 ];
 
 const TEXT_ORDER: readonly TextKey[] = ["currency", "locale", "customer", "customerPlural", "unit", "unitPlural", "title"];
@@ -90,6 +110,10 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   customerPlural: "",
   unitPlural: "",
   title: "Rentability",
+  goal: "",
+  goalMonth: 12,
+  goalMargin: 10_000,
+  solve: "price",
 });
 
 /** What follows the language: formatting, nouns and heading. */
@@ -177,6 +201,15 @@ export function readNumber(field: NumericField, raw: string): NumberResult {
 /**
  * @param fallbackLang the language when the query names none, e.g. the browser's.
  */
+function readChoice<T extends string>(query: URLSearchParams, key: "goal" | "solve", choices: readonly T[], warnings: SettingsWarning[]): T | null {
+  const raw = query.get(key);
+  if (raw === null || raw.trim() === "") return null;
+  const value = raw.trim().toLowerCase();
+  const match = choices.find((choice) => choice.toLowerCase() === value);
+  if (!match) warnings.push({ param: key, value: raw, reason: "invalid" });
+  return match ?? null;
+}
+
 export function parseSettings(
   query: URLSearchParams,
   fallbackLang: Lang = "en",
@@ -207,6 +240,11 @@ export function parseSettings(
     else warnings.push({ param: key, value: raw, reason: result.reason });
   }
 
+  const goal = readChoice(query, "goal", GOAL_KINDS, warnings);
+  if (goal) settings.goal = goal;
+  const solve = readChoice(query, "solve", SOLVABLE_KEYS, warnings);
+  if (solve) settings.solve = solve;
+
   return { settings, warnings };
 }
 
@@ -216,10 +254,20 @@ export function serializeSettings(settings: Settings): string {
   const defaults = defaultsFor(settings.lang);
   if (settings.lang !== DEFAULT_SETTINGS.lang) query.set("lang", settings.lang);
   for (const { key } of NUMERIC_FIELDS) {
-    if (settings[key] !== defaults[key]) query.set(key, String(settings[key]));
+    if (settings[key] !== defaults[key] && !GOAL_FIELDS.has(key)) query.set(key, String(settings[key]));
   }
   for (const key of TEXT_ORDER) {
     if (settings[key] !== defaults[key]) query.set(key, settings[key]);
+  }
+  // The goal block goes last and together, and only when a goal is set.
+  if (settings.goal !== "") {
+    query.set("goal", settings.goal);
+    if (settings.goal === "margin") {
+      if (settings.goalMargin !== defaults.goalMargin) query.set("goalMargin", String(settings.goalMargin));
+    } else if (settings.goalMonth !== defaults.goalMonth) {
+      query.set("goalMonth", String(settings.goalMonth));
+    }
+    if (settings.solve !== defaults.solve) query.set("solve", settings.solve);
   }
   return query.toString();
 }
