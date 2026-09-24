@@ -85,7 +85,7 @@ ul.plain{margin:0;padding-left:18px;display:grid;gap:6px;max-width:70ch}
     <h1>How many customers pay the rent?</h1>
     <p class="lede">A general-purpose version of an internal profitability simulator. The report takes a handful of assumptions about customers, usage, price and costs. It answers three questions: how many customers cover the fixed costs, in which month the margin turns positive, and when the early losses are paid back. Every setting lives in the URL, so a link is the whole report.</p>
     <div class="thesis">
-      <span class="chip">stateless</span><span class="chip">query string = state</span><span class="chip">server-rendered</span><span class="chip ok">integer cents</span>
+      <span class="chip">stateless</span><span class="chip">query string = state</span><span class="chip">static export</span><span class="chip ok">integer cents</span>
     </div>
   </header>
 
@@ -172,13 +172,13 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
     </div>
     <p class="muted">The reference setup (12 companies, 2 new a month, orders at €0.25) as a link. Every other value is already a default, so it is left out:</p>
     <div class="url">/?customers=<b>12</b>&amp;growth=<b>2</b>&amp;customer=<b>company</b>&amp;unit=<b>order</b></div>
-    <p class="muted">The same query string works for <code>GET /api/projection</code>, which returns the full projection as JSON, and <code>GET /api/projection.csv</code>, which returns the monthly table.</p>
+    <p class="muted">The site is served as static files. The <em>JSON</em> and <em>CSV</em> buttons build the projection and the monthly table in the browser, from the same query string.</p>
   </section>
 
   <section>
     <span class="eyebrow">Layout</span>
     <h2>Controls on the left, answer on the right</h2>
-    <p>Editing a field updates the URL with <code>router.replace</code> and recalculates right away. The page is also fully rendered on the server from the query, so it works without JavaScript and in a shared link preview.</p>
+    <p>Editing a field updates the URL with <code>history.replaceState</code> and recalculates right away. The page is a static export: the HTML ships with the default report, and the browser reads the query string and applies it on load.</p>
     <div class="wire" aria-hidden="true">
       <div class="rail">
         <span>Customers · start, growth, churn</span>
@@ -225,10 +225,10 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
     <span class="eyebrow">Stack &amp; standing specs</span>
     <h2>Stack</h2>
     <ul class="plain">
-      <li>Next.js 16 on Bun with Tailwind v4, shadcn primitives and Recharts; unit tests with <code>bun test</code>, end-to-end tests with Playwright. TDD for the engine and the query codec.</li>
-      <li>SOLID layout. <code>domain/</code> holds the pure engine, <code>query/</code> the parse and serialize codec, <code>server/</code> the logger and trace id, and <code>app/</code> the UI and API. The UI depends on the engine's types and nothing else.</li>
-      <li>One JSON object per log line, with the level set by <code>LOG_LEVEL</code> in <code>.env</code>. Each request gets an <code>x-trace-id</code>: an inbound id is kept if it passes sanitising, otherwise a new one is minted. The id goes into every log line and onto the response.</li>
-      <li>Docker multi-stage image with a standalone build, a compose file with a healthcheck, and the port taken from <code>freeport</code> in development.</li>
+      <li>Next.js 16 static export on Bun with Tailwind v4, shadcn primitives and Recharts; unit tests with <code>bun test</code>, end-to-end tests with Playwright. TDD for the engine and the query codec.</li>
+      <li>SOLID layout. <code>domain/</code> holds the pure engine, <code>query/</code> the parse and serialize codec, <code>export/</code> the JSON and CSV builders, and <code>app/</code> the UI. The UI depends on the engine's types and nothing else.</li>
+      <li>Served by nginx. Access and error logs are one JSON object per line, with the error-log level set by <code>LOG_LEVEL</code> in <code>.env</code>. Each request carries an <code>x-trace-id</code>: a valid inbound id is kept, otherwise nginx's <code>$request_id</code> is used. The id is written into every log line and sent back on the response.</li>
+      <li>Docker multi-stage image: Bun builds the site and nginx serves it, a compose file with a healthcheck, and the port taken from <code>freeport</code> in development.</li>
       <li>README.md, CLAUDE.md and TODO.md, all in English. One commit per iteration, and a review after each phase.</li>
     </ul>
     <div class="scroll na">
@@ -245,9 +245,9 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
   </section>
 
   <section class="ask">
-    <span class="eyebrow">Decisions to confirm</span>
-    <p><strong>Additions beyond the reference:</strong> the subscription fee, acquisition cost, margin rate, sensitivity heatmap, and JSON and CSV output. Any of them can be dropped.</p>
-    <p><strong>Access:</strong> the report is public, with no login. The reference page is internal-only, and a generic tool has nothing to protect.</p>
+    <span class="eyebrow">Decisions</span>
+    <p><strong>Additions beyond the reference:</strong> the subscription fee, acquisition cost, margin rate, sensitivity grid, and JSON and CSV export. <em>Confirmed: all kept.</em></p>
+    <p><strong>Access:</strong> public and statically served, with no login. <em>Confirmed.</em></p>
   </section>
 </main>
 

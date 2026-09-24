@@ -2,7 +2,7 @@
 
 ## Phase 0 — Scaffold
 - [x] git init, docs skeleton
-- [x] Spec artifact (design + query contract) — awaiting approval
+- [x] Spec artifact (design + query contract) — approved: static hosting, no login, all additions kept
 
 ## Phase 1 — Engine (TDD)
 - [ ] Money + VAT helpers
@@ -17,13 +17,13 @@
 - [ ] Review
 
 ## Phase 3 — App
-- [ ] Next.js app, server-rendered from query params
-- [ ] JSON API `/api/projection`
-- [ ] JSON logger with LOG_LEVEL, trace id (x-trace-id)
+- [ ] Next.js static export, state read from and written to the query string
+- [ ] JSON / CSV export built in the browser
 - [ ] KPIs, chart, sensitivity heatmap, monthly table, share link, CSV
 - [ ] Review
 
 ## Phase 4 — Ops
-- [ ] Dockerfile, docker compose, healthcheck
+- [ ] Dockerfile (bun build, nginx serve), docker compose, healthcheck
+- [ ] nginx JSON logs, LOG_LEVEL from .env, x-trace-id
 - [ ] Playwright e2e
 - [ ] Review artifact

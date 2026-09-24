@@ -6,7 +6,7 @@ A generic, stateless profitability projection. Enter customers, usage, price and
 - **In which month the margin turns positive** (break-even month)
 - **When the early losses are paid back** (payback month)
 
-Every setting lives in the query string, so a link *is* the report. Nothing is stored server-side.
+Every setting lives in the query string, so a link *is* the report. The site is a static export served by nginx: no login, no API, nothing stored.
 
 Inspired by an internal profitability simulator, generalised: nouns, currency and locale are configurable, and it adds an optional subscription fee, acquisition cost, margin rate and a price × volume sensitivity grid.
 
