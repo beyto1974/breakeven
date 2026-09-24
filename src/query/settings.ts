@@ -122,7 +122,8 @@ type NumberResult = { ok: true; value: number } | { ok: false; reason: WarningRe
 
 export function readNumber(field: NumericField, raw: string): NumberResult {
   const text = raw.trim().replace(",", ".");
-  if (!/^-?\d*\.?\d+$|^-?\d+\.$/.test(text)) return { ok: false, reason: "not-a-number" };
+  // Plain decimals, plus exponents: String() writes tiny values such as 1e-7 that way.
+  if (!/^-?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(text)) return { ok: false, reason: "not-a-number" };
   const parsed = Number(text);
   if (!Number.isFinite(parsed)) return { ok: false, reason: "not-a-number" };
   if (field.integer && !Number.isInteger(parsed)) return { ok: false, reason: "not-an-integer" };

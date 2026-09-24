@@ -21,6 +21,11 @@ describe("toCsv", () => {
     );
   });
 
+  test("writes fractional new customers as they are", () => {
+    const fractional = project(toProjectionInput({ ...DEFAULT_SETTINGS, growth: 2.4, months: 2 }));
+    expect(toCsv(fractional).split("\n")[2]?.split(",")[2]).toBe("2.4");
+  });
+
   test("ends with a newline", () => {
     expect(toCsv(projection).endsWith("\n")).toBe(true);
   });

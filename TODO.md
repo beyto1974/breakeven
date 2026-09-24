@@ -5,12 +5,13 @@
 - [x] Spec artifact (design + query contract) — approved: static hosting, no login, all additions kept
 
 ## Phase 1 — Engine (TDD)
-- [ ] Money + VAT helpers
-- [ ] Monthly projection (customers, growth, churn, units, price, VAT, variable, fixed, subscription, acquisition cost)
-- [ ] Break-even customers, break-even month, payback month
-- [ ] Sensitivity grid (price x volume)
-- [ ] Query-param codec (parse with defaults/clamping, serialize minimal)
-- [ ] Review
+- [x] CSV / JSON builders, formatter, chart scale, summary sentence
+- [x] Money + VAT helpers
+- [x] Monthly projection (customers, growth, churn, units, price, VAT, variable, fixed, subscription, acquisition cost)
+- [x] Break-even customers, break-even month, payback month
+- [x] Sensitivity grid (price x volume)
+- [x] Query-param codec (parse with defaults/clamping, serialize minimal)
+- [x] Review — no correctness bugs. Fixed: exponent notation (String() writes 1e-7) now parses, so every serialised value round-trips; added fractional-CSV test. Known: steady-state contribution divides by the VAT factor while monthly revenue floors to the cent (max 1 cent apart, by design).
 
 ## Phase 2 — Prototype artifact
 - [ ] Single-page interactive prototype of the report

@@ -37,6 +37,19 @@ describe("parseSettings", () => {
     expect(warnings).toEqual([]);
   });
 
+  test("accepts exponent notation, which String() produces for tiny values", () => {
+    const { settings, warnings } = parseSettings(new URLSearchParams("churn=1e-7&units=1E3"));
+    expect(settings.churn).toBe(1e-7);
+    expect(settings.units).toBe(1000);
+    expect(warnings).toEqual([]);
+  });
+
+  test("rejects partial numbers", () => {
+    for (const bad of ["1.2.3", "12abc", "e5", "--1", "."]) {
+      expect(parseSettings(new URLSearchParams({ growth: bad })).warnings[0]?.reason).toBe("not-a-number");
+    }
+  });
+
   test("falls back to the default and warns on a value that is not a number", () => {
     const { settings, warnings } = parseSettings(new URLSearchParams("growth=lots"));
     expect(settings.growth).toBe(3);
@@ -102,6 +115,12 @@ describe("serializeSettings", () => {
   test("writes only values that differ from the defaults, in contract order", () => {
     const query = serializeSettings({ ...DEFAULT_SETTINGS, unit: "bon", customers: 12, customer: "company", growth: 2 });
     expect(query).toBe("customers=12&growth=2&customer=company&unit=bon");
+  });
+
+  test("round-trips a tiny value written in exponent notation", () => {
+    const settings = { ...DEFAULT_SETTINGS, churn: 1e-7 };
+    expect(serializeSettings(settings)).toBe("churn=1e-7");
+    expect(parseSettings(new URLSearchParams(serializeSettings(settings))).settings).toEqual(settings);
   });
 
   test("round-trips through parseSettings", () => {

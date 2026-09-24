@@ -16,6 +16,8 @@ export type Verdict = "repaid" | "turning" | "loss" | "never";
 export interface Summary {
   verdict: Verdict;
   sentence: string;
+  /** The figures inside the sentence, in order, for the UI to emphasise. */
+  highlights: string[];
 }
 
 /** English plural of the last word of a label; the singular for exactly one. */
@@ -28,36 +30,30 @@ export function plural(noun: string, count = 2): string {
 
 export function summarize(projection: Projection, settings: Settings, fmt: Formatter): Summary {
   const { breakEvenCustomers, breakEvenMonth, paybackMonth } = projection;
-  const customers = plural(settings.customer);
+  const highlights: string[] = [];
+  const mark = (figure: string): string => {
+    highlights.push(figure);
+    return figure;
+  };
+  const done = (verdict: Verdict, sentence: string): Summary => ({ verdict, sentence, highlights });
 
   if (breakEvenCustomers === null) {
-    return {
-      verdict: "never",
-      sentence: `Each ${settings.customer} costs more than it brings in, so no number of ${customers} covers the fixed costs.`,
-    };
+    return done(
+      "never",
+      `Each ${settings.customer} costs more than it brings in, so no number of ${plural(settings.customer)} covers the fixed costs.`,
+    );
   }
 
   const fixedCents = projection.months[0]?.fixedCostCents ?? 0;
   const threshold =
     fixedCents === 0
       ? `There are no fixed costs, so every ${settings.customer} adds margin.`
-      : `${fmt.integer(breakEvenCustomers)} ${plural(settings.customer, breakEvenCustomers)} ${breakEvenCustomers === 1 ? "covers" : "cover"} ${fmt.moneyShort(fixedCents)} of fixed costs a month.`;
-  const horizon = `${settings.months} ${plural("month", settings.months)}`;
+      : `${mark(`${fmt.integer(breakEvenCustomers)} ${plural(settings.customer, breakEvenCustomers)}`)} ${breakEvenCustomers === 1 ? "covers" : "cover"} ${mark(fmt.moneyShort(fixedCents))} of fixed costs a month.`;
+  const horizon = () => mark(`${settings.months} ${plural("month", settings.months)}`);
 
-  if (breakEvenMonth === null) {
-    return { verdict: "loss", sentence: `${threshold} The margin does not turn within ${horizon}.` };
-  }
-  if (breakEvenMonth === 1 && paybackMonth === 1) {
-    return { verdict: "repaid", sentence: `${threshold} The margin is positive from month 1.` };
-  }
-  if (paybackMonth === null) {
-    return {
-      verdict: "turning",
-      sentence: `${threshold} The margin turns in month ${breakEvenMonth}, but the early losses are not repaid within ${horizon}.`,
-    };
-  }
-  return {
-    verdict: "repaid",
-    sentence: `${threshold} The margin turns in month ${breakEvenMonth} and the early losses are repaid in month ${paybackMonth}.`,
-  };
+  if (breakEvenMonth === null) return done("loss", `${threshold} The margin does not turn within ${horizon()}.`);
+  if (breakEvenMonth === 1 && paybackMonth === 1) return done("repaid", `${threshold} The margin is positive from ${mark("month 1")}.`);
+  const turns = `The margin turns in ${mark(`month ${breakEvenMonth}`)}`;
+  if (paybackMonth === null) return done("turning", `${threshold} ${turns}, but the early losses are not repaid within ${horizon()}.`);
+  return done("repaid", `${threshold} ${turns} and the early losses are repaid in ${mark(`month ${paybackMonth}`)}.`);
 }

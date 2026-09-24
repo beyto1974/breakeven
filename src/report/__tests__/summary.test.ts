@@ -33,6 +33,14 @@ describe("summarize", () => {
     expect(summary.sentence).toBe(
       "32 customers cover €200 of fixed costs a month. The margin turns in month 8 and the early losses are repaid in month 15.",
     );
+    expect(summary.highlights).toEqual(["32 customers", "€200", "month 8", "month 15"]);
+  });
+
+  test("every highlight appears in the sentence", () => {
+    for (const overrides of [{}, { months: 12 }, { growth: 0 }, { customers: 100 }, { price: 0.05 }]) {
+      const summary = run(overrides);
+      for (const figure of summary.highlights) expect(summary.sentence).toContain(figure);
+    }
   });
 
   test("uses the configured nouns", () => {
