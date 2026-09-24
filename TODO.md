@@ -14,8 +14,8 @@
 - [x] Review — no correctness bugs. Fixed: exponent notation (String() writes 1e-7) now parses, so every serialised value round-trips; added fractional-CSV test. Known: steady-state contribution divides by the VAT factor while monthly revenue floors to the cent (max 1 cent apart, by design).
 
 ## Phase 2 — Prototype artifact
-- [ ] Single-page interactive prototype of the report
-- [ ] Review
+- [x] Single-page interactive prototype of the report (`bun run build:prototype`)
+- [x] Review — self-check render: fixed mixed number formats under en-BE (default now en-IE). Awaiting user feedback on look and numbers.
 
 ## Phase 3 — App
 - [ ] Next.js static export, state read from and written to the query string
