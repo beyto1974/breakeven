@@ -1,30 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { plural, summarize } from "../summary";
+import { summarize } from "../summary";
 import { project } from "@/domain/projection";
 import { createFormatter } from "@/format/format";
-import { DEFAULT_SETTINGS, toProjectionInput, type Settings } from "@/query/settings";
+import { DEFAULT_SETTINGS, defaultsFor, toProjectionInput, type Settings } from "@/query/settings";
+import type { Lang } from "@/i18n/lang";
 
 const fmt = createFormatter({ locale: "en-US", currency: "EUR" });
-const run = (overrides: Partial<Settings> = {}) => {
-  const settings = { ...DEFAULT_SETTINGS, ...overrides };
+const run = (overrides: Partial<Settings> = {}, lang: Lang = "en") => {
+  const settings = { ...(lang === "en" ? DEFAULT_SETTINGS : defaultsFor(lang)), ...overrides };
   return summarize(project(toProjectionInput(settings)), settings, fmt);
 };
-
-describe("plural", () => {
-  test("follows the common English rules", () => {
-    expect(plural("customer")).toBe("customers");
-    expect(plural("company")).toBe("companies");
-    expect(plural("day")).toBe("days");
-    expect(plural("box")).toBe("boxes");
-    expect(plural("match")).toBe("matches");
-    expect(plural("work order")).toBe("work orders");
-  });
-
-  test("uses the singular for exactly one", () => {
-    expect(plural("company", 1)).toBe("company");
-    expect(plural("company", 2)).toBe("companies");
-  });
-});
 
 describe("summarize", () => {
   test("the default report turns and repays inside the horizon", () => {
@@ -63,7 +48,7 @@ describe("summarize", () => {
     const summary = run({ price: 0.05 });
     expect(summary.verdict).toBe("never");
     expect(summary.sentence).toBe(
-      "Each customer costs more than it brings in, so no number of customers covers the fixed costs.",
+      "For each customer, costs exceed revenue, so no number of customers covers the fixed costs.",
     );
   });
 
@@ -75,5 +60,22 @@ describe("summarize", () => {
 
   test("does not speak of a threshold without fixed costs", () => {
     expect(run({ fixed: 0 }).sentence).toBe("There are no fixed costs, so every customer adds margin. The margin is positive from month 1.");
+  });
+
+  test("speaks Dutch", () => {
+    expect(run({}, "nl").sentence).toBe(
+      "32 klanten dekken €200 vaste kosten per maand. De marge wordt positief in maand 8 en de aanloopverliezen zijn terugverdiend in maand 15.",
+    );
+    expect(run({ customer: "werkbon" }, "nl").sentence.startsWith("32 werkbonnen dekken")).toBe(true);
+  });
+
+  test("speaks French", () => {
+    expect(run({ months: 12 }, "fr").sentence).toBe(
+      "32 clients couvrent €200 de frais fixes par mois. La marge devient positive au mois 8, mais les pertes de départ ne sont pas remboursées en 12 mois.",
+    );
+  });
+
+  test("uses an explicit plural", () => {
+    expect(run({ customer: "person", customerPlural: "people" }).sentence.startsWith("32 people cover")).toBe(true);
   });
 });

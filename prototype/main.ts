@@ -10,7 +10,10 @@ import { exportFileName, toCsv, toJson } from "@/export/export";
 import { createFormatter, type Formatter } from "@/format/format";
 import { linear, niceScale } from "@/chart/scale";
 import { reach } from "@/report/heat";
-import { plural, summarize } from "@/report/summary";
+import { summarize } from "@/report/summary";
+import { pluralize } from "@/i18n/plural";
+
+const plural = (noun: string, count?: number): string => pluralize("en", noun, count);
 import {
   DEFAULT_SETTINGS,
   MONTH_PRESETS,
