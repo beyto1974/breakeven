@@ -22,7 +22,7 @@
 - [x] JSON / CSV export built in the browser
 - [x] i18n: en / nl / fr via `lang`, per-language defaults, plural rules + overrides
 - [x] KPIs, chart, sensitivity heatmap, monthly table, share link, CSV
-- [ ] Review
+- [x] Review — 4 risks raised, none reproduced: an empty projection cannot occur (the horizon is at least 1 month); a flat chart domain is handled by niceScale; `<html lang>` is set after hydration on purpose (static HTML is English); the lang rewrite on popstate only adds `lang` to the current entry. Static build verified.
 
 - [x] Average revenue / contribution per customer next to per-customer fields
 
