@@ -227,8 +227,8 @@ marginRate          = totalMargin / totalRevenue        <span class="c">// new; 
     <ul class="plain">
       <li>Next.js 16 static export on Bun with Tailwind v4, shadcn primitives and Recharts; unit tests with <code>bun test</code>, end-to-end tests with Playwright. TDD for the engine and the query codec.</li>
       <li>SOLID layout. <code>domain/</code> holds the pure engine, <code>query/</code> the parse and serialize codec, <code>export/</code> the JSON and CSV builders, and <code>app/</code> the UI. The UI depends on the engine's types and nothing else.</li>
-      <li>Served by nginx. Access and error logs are one JSON object per line, with the error-log level set by <code>LOG_LEVEL</code> in <code>.env</code>. Each request carries an <code>x-trace-id</code>: a valid inbound id is kept, otherwise nginx's <code>$request_id</code> is used. The id is written into every log line and sent back on the response.</li>
-      <li>Docker multi-stage image: Bun builds the site and nginx serves it, a compose file with a healthcheck, and the port taken from <code>freeport</code> in development.</li>
+      <li>Served by a small Bun server. Every log line is one JSON object, filtered by <code>LOG_LEVEL</code> in <code>.env</code>. Each request carries an <code>x-trace-id</code>: a valid inbound id is kept, otherwise a new one is minted. The id is written into the log line and sent back on the response.</li>
+      <li>Docker multi-stage image: Bun builds the site and serves it, a compose file with a healthcheck, and the port taken from <code>freeport</code> in development.</li>
       <li>README.md, CLAUDE.md and TODO.md, all in English. One commit per iteration, and a review after each phase.</li>
     </ul>
     <div class="scroll na">

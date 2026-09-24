@@ -24,8 +24,10 @@
 - [x] KPIs, chart, sensitivity heatmap, monthly table, share link, CSV
 - [ ] Review
 
+- [x] Average revenue / contribution per customer next to per-customer fields
+
 ## Phase 4 — Ops
-- [ ] Dockerfile (bun build, nginx serve), docker compose, healthcheck
-- [ ] nginx JSON logs, LOG_LEVEL from .env, x-trace-id
-- [ ] Playwright e2e
+- [x] Dockerfile (bun build + Bun static server), docker compose, healthcheck — nginx replaced: its error log cannot be JSON
+- [x] JSON logs, LOG_LEVEL from .env, x-trace-id (src/server, unit-tested)
+- [x] Playwright e2e (15 tests on the static build)
 - [ ] Review artifact

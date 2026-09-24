@@ -7,14 +7,19 @@ Generic stateless rentability (profitability) projection report, generalised fro
 - English everywhere: code, comments, Markdown.
 - One commit per reasonable iteration. Plain commit messages, no AI attribution trailers (a hook rejects them).
 - TDD: write or extend the test first for anything in `src/domain` and `src/query`.
-- SOLID: `src/domain` is pure (no I/O, no React, no Next). `src/query` maps URL params to domain input and back. `src/export` builds JSON/CSV downloads. `src/app` is UI and routes and depends on the others, never the reverse.
+- SOLID: `src/domain` is pure (no I/O, no React, no Next). `src/query` maps URL params to domain input and back. `src/export` builds JSON/CSV downloads. `src/i18n` holds languages, messages and plural rules. `src/server` serves `out/` in production. `src/app` is UI and routes and depends on the others, never the reverse.
 - Money is integer cents inside the domain. Prices include VAT; VAT is removed from revenue only.
-- Statically served (`next build` with `output: "export"`, served by nginx). No login. State lives only in the query string. No database, no storage, no cookies, no API routes.
-- Logging: nginx access/error logs are one JSON object per line; error-log level from `LOG_LEVEL` in `.env`. Every request carries `x-trace-id` (valid inbound id kept, otherwise nginx `$request_id`), echoed on the response and written in every log line.
+- Statically served: `next build` with `output: "export"` into `out/`, served by the small Bun server in `src/server`. No login. State lives only in the query string. No database, no storage, no cookies, no API routes.
+- Logging: `src/server/logger.ts`, one JSON object per line on stdout, level from `LOG_LEVEL` in `.env` (trace…fatal). Every request carries `x-trace-id` (valid inbound `x-trace-id` or `x-request-id` kept, otherwise a 16-hex id is minted), echoed on the response and written in its log line. The query string is never logged, only its length.
 - Never hardcode a dev port: `PORT=$(freeport) bun run dev`. Report URLs as `http://localhost:<port>`.
 - UI languages: en, nl, fr (`src/i18n/messages.ts`); every user-visible string goes through `messages(lang)`. Code, comments and Markdown stay English.
 - Every required form field has the `required` attribute. Numeric inputs use `inputmode="decimal"`.
 - Review after each phase; record the outcome in TODO.md.
+
+## Commands
+- `bun test` — unit tests (TDD); `bun run test:e2e` — Playwright on the static build (port from freeport)
+- `PORT=$(freeport) bun run dev` — dev server
+- `WEB_PORT=$(freeport) docker compose up -d --build` — production image on 127.0.0.1
 
 ## Artefacts
 1. `docs/artifacts/spec.html` — design and query contract
