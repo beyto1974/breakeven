@@ -27,7 +27,13 @@
 - [x] Average revenue / contribution per customer next to per-customer fields
 
 ## Phase 4 — Ops
-- [x] Dockerfile (bun build + Bun static server), docker compose, healthcheck — nginx replaced: its error log cannot be JSON
-- [x] JSON logs, LOG_LEVEL from .env, x-trace-id (src/server, unit-tested)
+- [x] Hosting: GitHub Pages via `.github/workflows/pages.yml` (tests, build with BASE_PATH, deploy). Docker and compose removed at the user's request.
+- [x] Preview server for local use and e2e (src/server): JSON logs, LOG_LEVEL, x-trace-id. Not used on Pages.
 - [x] Playwright e2e (15 tests on the static build)
-- [ ] Review artifact
+- [x] Review — the one finding was real: the preview server followed symlinks out of its root. Fixed with a realpath check and a test.
+- [x] Review report written to `docs/artifacts/review.html` (not published)
+
+## Phase 5 — Target solver
+- [x] Domain solver: bisection on one assumption, for break-even, payback or margin goals
+- [x] Query params: goal, goalMonth, goalMargin, solve
+- [x] Panel in nl/fr/en with apply; e2e tests

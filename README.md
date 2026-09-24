@@ -6,7 +6,7 @@ A generic, stateless profitability projection. Enter customers, usage, price and
 - **In which month the margin turns positive** (break-even month)
 - **When the early losses are paid back** (payback month)
 
-Every setting lives in the query string, so a link *is* the report. The site is a static export served by a small Bun server: no login, no API, nothing stored.
+Every setting lives in the query string, so a link *is* the report. The site is a static export hosted on GitHub Pages: no login, no API, nothing stored.
 
 Inspired by an internal profitability simulator, generalised: nouns, currency and locale are configurable, and it adds an optional subscription fee, acquisition cost, margin rate and a price × volume sensitivity grid.
 
@@ -30,6 +30,10 @@ Inspired by an internal profitability simulator, generalised: nouns, currency an
 | `locale` | Number format, BCP 47 tag | follows `lang`: en-IE, nl-BE, fr-BE | |
 | `customer` / `unit` | Nouns used in labels, singular | follows `lang`: customer/unit, klant/eenheid, client/unité | 1 – 32 chars |
 | `customerPlural` / `unitPlural` | Plural for irregular nouns; empty uses the language's rules | (rules) | 1 – 32 chars |
+| `goal` | Target solver: `breakeven`, `payback` or `margin`. Absent means the solver is closed | | |
+| `goalMonth` | Month for a break-even or payback goal | 12 | 1 – 120 |
+| `goalMargin` | Total margin for a margin goal | 10000 | −1e9 – 1e9 |
+| `solve` | Assumption to solve for: price, units, subscription, customers, growth, churn, variable, fixed, cac | price | |
 | `title` | Report heading | follows `lang`: Rentability, Rentabiliteit, Rentabilité | 1 – 80 chars |
 
 Invalid or out-of-range values fall back to the default and are reported as warnings. Serialisation writes only non-default values.
@@ -42,17 +46,20 @@ bun test              # unit tests
 PORT=$(freeport) bun run dev   # then open http://localhost:<port>
 bun run build         # static export into out/
 bun run test:e2e      # Playwright against the static build
+PORT=$(freeport) bun run preview   # serve out/ locally
 ```
 
-## Running in Docker
+## Deployment: GitHub Pages
 
-```bash
-cp .env.example .env               # set LOG_LEVEL, and WEB_PORT=$(freeport)
-docker compose up -d --build       # http://localhost:$WEB_PORT
-docker compose logs -f web         # one JSON object per line
-```
+`.github/workflows/pages.yml` runs on every push to `main`. It does three things:
 
-The image runs the tests, builds the static export and serves it with `src/server`. It sends security headers, caches hashed assets for a year, and exposes `/healthz` for the healthcheck. Every response carries `x-trace-id`: a valid inbound `x-trace-id` or `x-request-id` is reused, otherwise a new id is minted, and the same id appears in that request's log line. `LOG_LEVEL` is one of trace, debug, info, warn, error, fatal. Health checks are logged at debug, 4xx at warn, 5xx at error. The container is read-only, drops all capabilities and publishes on 127.0.0.1 only.
+1. Runs the type check, the unit tests and the Playwright suite.
+2. Builds the static export. `BASE_PATH` is set to the Pages base path, so a project site works under `/<repository>/`.
+3. Publishes `out/` with `actions/deploy-pages`.
+
+To enable it: Settings, then Pages, then Source: **GitHub Actions**.
+
+Since Pages hosts static files only, there is no server-side logging, trace id or container. `src/server` is a small static server used only for local previews (`bun run preview`) and the end-to-end tests.
 
 ## Status
 

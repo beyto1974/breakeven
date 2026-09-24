@@ -1,0 +1,145 @@
+<title>Rentability Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --ink:#101828; --muted:#5B6576; --line:#DDE2EA;
+  --accent:#3A4BE0; --accent-soft:#E6E9FC; --profit:#0E9F6E; --loss:#D93F55; --warn:#B7791F;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0C1220; --surface:#141B2D; --ink:#E7ECF5; --muted:#98A2B6; --line:#26304A;
+    --accent:#8C9BFF; --accent-soft:#1F2850; --profit:#34D399; --loss:#FF6B81; --warn:#F6C35B;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0C1220; --surface:#141B2D; --ink:#E7ECF5; --muted:#98A2B6; --line:#26304A;
+  --accent:#8C9BFF; --accent-soft:#1F2850; --profit:#34D399; --loss:#FF6B81; --warn:#F6C35B;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--body);padding:0 16px}
+main{max-width:1040px;margin:0 auto;padding-block:40px 80px;display:grid;gap:56px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(34px,6vw,56px);font-weight:700;letter-spacing:-.02em}
+h2{font-size:26px;font-weight:700}
+h3{font-size:17px;font-weight:600;font-family:var(--body)}
+p{margin:0;max-width:65ch}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lede{font-size:18px;color:var(--muted)}
+section{display:grid;gap:20px}
+.hero{display:grid;gap:18px}
+.hero .thesis{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.chip{font:500 13px/1 var(--mono);padding:8px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.chip.ok{background:color-mix(in srgb,var(--profit) 14%,transparent);color:var(--profit)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.artefact{display:grid;gap:10px;align-content:start}
+.artefact .n{font:500 12px/1 var(--mono);color:var(--muted)}
+.artefact .state{justify-self:start;font:500 12px/1 var(--mono);padding:6px 10px;border-radius:6px;border:1px solid var(--line)}
+.artefact .state.now{border-color:var(--accent);color:var(--accent)}
+.muted{color:var(--muted)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 12px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--bg) 60%,var(--surface))}
+tr:last-child td{border-bottom:0}
+td code,code{font:13px/1.4 var(--mono);color:var(--accent)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+pre{margin:0;font:13px/1.7 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;overflow-x:auto;color:var(--ink)}
+pre .c{color:var(--muted)}
+.url{font:13px/1.6 var(--mono);word-break:break-all;background:var(--surface);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px}
+.url b{color:var(--accent);font-weight:500}
+/* wireframe */
+.wire{display:grid;grid-template-columns:260px 1fr;gap:14px}
+.wire .rail,.wire .box{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px;font:12px/1.5 var(--mono);color:var(--muted)}
+.wire .rail{display:grid;gap:10px;align-content:start}
+.wire .rail span{display:block;border-bottom:1px dashed var(--line);padding-bottom:8px}
+.wire .main{display:grid;gap:14px}
+.wire .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wire .kpis .box b{display:block;font:600 18px/1.2 var(--display);color:var(--ink)}
+.wire .tall{min-height:0}
+@media (max-width:760px){.wire{grid-template-columns:1fr}.wire .kpis{grid-template-columns:repeat(2,1fr)}}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font:12px/1 var(--mono);color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sw{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.sw div{height:54px}
+.sw p{font:12px/1.4 var(--mono);padding:8px 10px;color:var(--muted)}
+.types{display:grid;gap:10px}
+.types div{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px}
+.types small{font:12px/1 var(--mono);color:var(--muted);min-width:120px}
+ul.plain{margin:0;padding-left:18px;display:grid;gap:6px;max-width:70ch}
+.na td:first-child{white-space:nowrap}
+.ask{border-left:3px solid var(--accent);padding:4px 0 4px 16px;display:grid;gap:8px}
+</style>
+
+<main>
+  <header class="hero">
+    <span class="eyebrow">Artefact 3 of 3 · Review</span>
+    <h1>What was built, and what the reviews found</h1>
+    <p class="lede">A stateless rentability report hosted on GitHub Pages. Every setting lives in the URL, the interface is available in English, Dutch and French, and a target solver runs the model backwards.</p>
+    <div class="thesis"><span class="chip ok">154 unit tests</span><span class="chip ok">18 e2e tests</span><span class="chip">26 commits</span><span class="chip">static export</span></div>
+  </header>
+
+  <section>
+    <span class="eyebrow">Delivered</span>
+    <h2>Features</h2>
+    <ul class="plain">
+      <li><strong>Projection engine</strong>: customers, growth, churn, units, price and subscription (both VAT included), variable, fixed and acquisition cost. Money is held in integer cents. Outputs are the break-even threshold, break-even month, payback month, margin and margin rate.</li>
+      <li><strong>Report</strong>: a one-sentence answer with a verdict, four headline figures, a month-by-month chart with a hover readout, a 7 × 7 price × usage grid (click a cell to apply it) and a monthly table. The <em>per customer per month</em> field shows the average revenue and contribution per customer.</li>
+      <li><strong>Target solver</strong>: choose break-even by month M, payback by month M, or a total margin. Then choose one of nine assumptions, and the solver finds the value that just meets the goal. One click applies it.</li>
+      <li><strong>Languages</strong>: en, nl and fr, set by <code>lang</code> or detected from the browser and then written to the URL. Number format, nouns and title follow the language. Plural rules cover regular words, and <code>customerPlural</code> and <code>unitPlural</code> handle irregular ones.</li>
+      <li><strong>Sharing</strong>: the URL contains only the values that differ from the defaults. Copy-link, JSON and CSV downloads are built in the browser.</li>
+      <li><strong>Hosting</strong>: a GitHub Actions workflow runs the tests, builds with the Pages base path and deploys.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="eyebrow">Phase reviews</span>
+    <h2>Findings and outcomes</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Phase</th><th>Finding</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>1 · Engine</td><td>Exponent notation (<code>1e-7</code>, which <code>String()</code> writes for tiny values) did not parse back.</td><td>Fixed. The parser now accepts exponents, and a test checks that every serialised value round-trips.</td></tr>
+        <tr><td>1 · Engine</td><td>Fractional new customers were not covered in the CSV tests.</td><td>Test added.</td></tr>
+        <tr><td>2 · Prototype</td><td>The <code>en-BE</code> locale mixed number formats: 1.019 for counts next to €1,505 for money.</td><td>Default locale changed to <code>en-IE</code>.</td></tr>
+        <tr><td>3 · App</td><td>Four risks: empty chart, flat scale, the <code>html lang</code> attribute, and the URL rewrite on back/forward.</td><td>None could be reproduced. The horizon is at least one month, flat domains are handled, and <code>lang</code> is set after load on purpose.</td></tr>
+        <tr><td>4 · Server</td><td>The preview server followed symlinks outside its root.</td><td>Fixed with a <code>realpath</code> check, plus a test.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Standing specs</span>
+    <h2>How each one was met</h2>
+    <div class="scroll na"><table>
+      <thead><tr><th>Spec</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>git, one commit per iteration</td><td>26 commits with plain messages.</td></tr>
+        <tr><td>SOLID, TDD</td><td>The dependency order is domain, then query, then report and i18n, then app. Each layer uses only the ones before it, and the domain never imports the app. Every pure module had its tests written first.</td></tr>
+        <tr><td>Docker / compose</td><td>Built at first, then removed at your request because Pages needs no container.</td></tr>
+        <tr><td>JSON logging, LOG_LEVEL, trace id</td><td>Implemented in the preview server. GitHub Pages has no server-side logs.</td></tr>
+        <tr><td>S3</td><td>Not applicable: nothing is stored.</td></tr>
+        <tr><td>README, CLAUDE.md, TODO.md; English</td><td>Done. The interface is also available in nl and fr.</td></tr>
+        <tr><td>Themed mails, numeric OTP</td><td>Not applicable: no accounts and no mail.</td></tr>
+        <tr><td><code>required</code> on required fields</td><td>On all 11 model inputs and on the solver fields. An e2e test checks it.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Open</span>
+    <h2>Next candidates</h2>
+    <ul class="plain">
+      <li>Scenario comparison (A/B/C), growth modes, price and cost indexation, and a unit-economics panel (LTV, LTV ÷ acquisition cost).</li>
+      <li>A print stylesheet and social preview images for Pages.</li>
+      <li>The first push to GitHub. There is no remote yet, and Pages must be enabled with the source set to GitHub Actions.</li>
+    </ul>
+  </section>
+</main>

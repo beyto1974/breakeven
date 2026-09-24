@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHandler } from "../handler";
@@ -18,11 +18,14 @@ beforeAll(async () => {
   await mkdir(join(root, "docs"), { recursive: true });
   await writeFile(join(root, "docs/index.html"), "<h1>docs</h1>");
   await writeFile(join(root, "data.json"), "{}");
+  await writeFile(join(root, "..", `${root.split("/").pop()}-secret.txt`), "secret");
+  await symlink(join(root, "..", `${root.split("/").pop()}-secret.txt`), join(root, "exposed.txt"));
   const logger = createLogger({ level: "debug", write: (line) => lines.push(line) });
   handle = createHandler({ root, logger });
 });
 
 afterAll(async () => {
+  await rm(join(root, "..", `${root.split("/").pop()}-secret.txt`), { force: true });
   await rm(root, { recursive: true, force: true });
 });
 
@@ -61,6 +64,12 @@ describe("static handler", () => {
     for (const path of ["/../etc/passwd", "/%2e%2e/%2e%2e/etc/passwd", "/..%2Fpackage.json", "/docs/../../x"]) {
       expect((await get(path)).status).toBe(404);
     }
+  });
+
+  test("does not follow a symlink out of the root", async () => {
+    const response = await get("/exposed.txt");
+    expect(response.status).toBe(404);
+    expect(await response.text()).not.toContain("secret");
   });
 
   test("rejects methods other than GET and HEAD", async () => {

@@ -2,7 +2,7 @@
  * Serves the static export. The report keeps its state in the query string, so
  * the server never reads it: every path maps to a file, and that is all.
  */
-import { stat } from "node:fs/promises";
+import { realpath, stat } from "node:fs/promises";
 import { extname, join, normalize, sep } from "node:path";
 import type { Logger } from "./logger";
 import { TRACE_HEADER, traceIdFor } from "./trace";
@@ -50,7 +50,7 @@ async function isFile(path: string): Promise<boolean> {
 }
 
 /** The file a URL path names, or null. Never resolves outside `root`. */
-async function resolve(root: string, pathname: string): Promise<string | null> {
+async function resolve(root: string, realRoot: string, pathname: string): Promise<string | null> {
   let decoded: string;
   try {
     decoded = decodeURIComponent(pathname);
@@ -61,7 +61,10 @@ async function resolve(root: string, pathname: string): Promise<string | null> {
   const target = normalize(join(root, decoded));
   if (target !== root && !target.startsWith(root + sep)) return null;
   for (const candidate of decoded.endsWith("/") ? [join(target, "index.html")] : [target, join(target, "index.html"), `${target}.html`]) {
-    if (await isFile(candidate)) return candidate;
+    if (!(await isFile(candidate))) continue;
+    // A symlink inside the root must not lead out of it.
+    const real = await realpath(candidate);
+    return real.startsWith(realRoot + sep) ? real : null;
   }
   return null;
 }
@@ -72,6 +75,7 @@ function cacheControl(pathname: string): string {
 
 export function createHandler({ root, logger }: Options): (request: Request) => Promise<Response> {
   const base = normalize(root).replace(/[\\/]+$/, "");
+  let realRoot: string | null = null;
 
   async function respond(request: Request, url: URL): Promise<Response> {
     if (request.method !== "GET" && request.method !== "HEAD") {
@@ -79,7 +83,8 @@ export function createHandler({ root, logger }: Options): (request: Request) => 
     }
     if (url.pathname === "/healthz") return Response.json({ status: "ok" }, { headers: { "cache-control": "no-store" } });
 
-    const file = await resolve(base, url.pathname);
+    realRoot ??= await realpath(base);
+    const file = await resolve(base, realRoot, url.pathname);
     if (file) {
       return new Response(Bun.file(file), {
         headers: { "content-type": TYPES[extname(file)] ?? "application/octet-stream", "cache-control": cacheControl(url.pathname) },

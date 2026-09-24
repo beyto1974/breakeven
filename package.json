@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "build:prototype": "bun run scripts/build-prototype.ts",
     "test:e2e": "E2E_PORT=${E2E_PORT:-$(freeport)} playwright test",
-    "start": "bun src/server/main.ts"
+    "preview": "PORT=${PORT:?set PORT, e.g. PORT=$(freeport)} bun src/server/main.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
