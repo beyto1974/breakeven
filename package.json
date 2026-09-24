@@ -4,12 +4,24 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "next dev -p ${PORT:?set PORT, e.g. PORT=$(freeport)}",
+    "build": "next build",
     "test": "bun test src",
     "typecheck": "tsc --noEmit",
     "build:prototype": "bun run scripts/build-prototype.ts"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/bun": "^1.4.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
+    "tailwindcss": "4",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "next": "16",
+    "react": "19",
+    "react-dom": "19"
   }
 }

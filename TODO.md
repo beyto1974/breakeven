@@ -18,9 +18,10 @@
 - [x] Review — self-check render: fixed mixed number formats under en-BE (default now en-IE). Awaiting user feedback on look and numbers.
 
 ## Phase 3 — App
-- [ ] Next.js static export, state read from and written to the query string
-- [ ] JSON / CSV export built in the browser
-- [ ] KPIs, chart, sensitivity heatmap, monthly table, share link, CSV
+- [x] Next.js static export, state read from and written to the query string
+- [x] JSON / CSV export built in the browser
+- [x] i18n: en / nl / fr via `lang`, per-language defaults, plural rules + overrides
+- [x] KPIs, chart, sensitivity heatmap, monthly table, share link, CSV
 - [ ] Review
 
 ## Phase 4 — Ops

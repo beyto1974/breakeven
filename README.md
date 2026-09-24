@@ -14,6 +14,7 @@ Inspired by an internal profitability simulator, generalised: nouns, currency an
 
 | Param | Meaning | Default | Range |
 |---|---|---|---|
+| `lang` | Interface language: `en`, `nl`, `fr`. Without it, the browser language is used and written into the URL | en | |
 | `customers` | Paying customers at month 1 | 15 | 0 – 1 000 000 |
 | `growth` | New customers per month | 3 | 0 – 100 000 |
 | `churn` | Customers lost per month, % | 2 | 0 – 100 |
@@ -26,11 +27,21 @@ Inspired by an internal profitability simulator, generalised: nouns, currency an
 | `cac` | Acquisition cost per new customer | 0 | 0 – 1 000 000 |
 | `months` | Horizon | 24 | 1 – 120 |
 | `currency` | ISO 4217 code | EUR | |
-| `locale` | BCP 47 tag | en-IE | |
-| `customer` / `unit` | Nouns used in labels | customer / unit | 1 – 32 chars |
-| `title` | Report heading | Rentability | 1 – 80 chars |
+| `locale` | Number format, BCP 47 tag | follows `lang`: en-IE, nl-BE, fr-BE | |
+| `customer` / `unit` | Nouns used in labels, singular | follows `lang`: customer/unit, klant/eenheid, client/unité | 1 – 32 chars |
+| `customerPlural` / `unitPlural` | Plural for irregular nouns; empty uses the language's rules | (rules) | 1 – 32 chars |
+| `title` | Report heading | follows `lang`: Rentability, Rentabiliteit, Rentabilité | 1 – 80 chars |
 
 Invalid or out-of-range values fall back to the default and are reported as warnings. Serialisation writes only non-default values.
+
+## Development
+
+```bash
+bun install
+bun test              # unit tests
+PORT=$(freeport) bun run dev   # then open http://localhost:<port>
+bun run build         # static export into out/
+```
 
 ## Status
 
