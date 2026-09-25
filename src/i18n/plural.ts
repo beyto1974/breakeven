@@ -54,12 +54,22 @@ function dutch(noun: string): string {
   return w + "en";
 }
 
-const RULES: Record<Lang, (noun: string) => string> = { en: english, nl: dutch, fr: french };
+/** A switch rather than a lookup table: `lang` can never select anything but these three. */
+function rules(lang: Lang, noun: string): string {
+  switch (lang) {
+    case "nl":
+      return dutch(noun);
+    case "fr":
+      return french(noun);
+    default:
+      return english(noun);
+  }
+}
 
 /** Singular for one (and for zero in French); otherwise the override or the rules. */
 export function pluralize(lang: Lang, noun: string, count = 2, override?: string): string {
   const singular = lang === "fr" ? Math.abs(count) < 2 : count === 1;
   if (singular) return noun;
   if (override && override.trim()) return override.trim();
-  return RULES[lang](noun);
+  return rules(lang, noun);
 }

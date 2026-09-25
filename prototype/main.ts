@@ -29,13 +29,9 @@ import {
 } from "@/query/settings";
 
 const root = document.getElementById("root")!;
-const initial = (() => {
-  try {
-    return parseSettings(new URLSearchParams(location.search));
-  } catch {
-    return { settings: { ...DEFAULT_SETTINGS }, warnings: [] as SettingsWarning[] };
-  }
-})();
+// The prototype is a design artefact: it starts from the defaults and never reads
+// the URL, so no outside input reaches the HTML it builds.
+const initial: { settings: Settings; warnings: SettingsWarning[] } = { settings: { ...DEFAULT_SETTINGS }, warnings: [] };
 let settings: Settings = initial.settings;
 let warnings: SettingsWarning[] = initial.warnings;
 
@@ -415,13 +411,8 @@ function shareLink(): string {
   return q ? `/?${q}` : "/";
 }
 
-function syncUrl(): void {
-  try {
-    history.replaceState(null, "", `${location.pathname}${serializeSettings(settings) ? `?${serializeSettings(settings)}` : ""}${location.hash}`);
-  } catch {
-    // Sandboxed frames may refuse; the share box still shows the link.
-  }
-}
+/** The share box shows the link; the prototype itself never touches the address bar. */
+function syncUrl(): void {}
 
 function refreshLabels(): void {
   const fmt = createFormatter(settings);
