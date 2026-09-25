@@ -86,7 +86,7 @@ export const NUMERIC_FIELDS: readonly NumericField[] = [
   { key: "goalMargin", min: -1_000_000_000, max: 1_000_000_000, money: true },
 ];
 
-const TEXT_ORDER: readonly TextKey[] = ["currency", "locale", "customer", "customerPlural", "unit", "unitPlural", "title"];
+export const TEXT_ORDER: readonly TextKey[] = ["currency", "locale", "customer", "customerPlural", "unit", "unitPlural", "title"];
 
 export const MONTH_PRESETS = [12, 24, 36, 60] as const;
 
@@ -117,7 +117,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 });
 
 /** What follows the language: formatting, nouns and heading. */
-const LANGUAGE_DEFAULTS: Record<Lang, Pick<Settings, "locale" | "customer" | "unit" | "title">> = {
+export const LANGUAGE_DEFAULTS: Record<Lang, Pick<Settings, "locale" | "customer" | "unit" | "title">> = {
   en: { locale: "en-IE", customer: "customer", unit: "unit", title: "Break-even" },
   nl: { locale: "nl-BE", customer: "klant", unit: "eenheid", title: "Rentabiliteit" },
   fr: { locale: "fr-BE", customer: "client", unit: "unité", title: "Rentabilité" },
@@ -147,7 +147,7 @@ export function switchLang(settings: Settings, lang: Lang): Settings {
 
 type TextResult = { ok: true; value: string } | { ok: false; reason: WarningReason };
 
-const MAX_LENGTH: Record<"customer" | "unit" | "customerPlural" | "unitPlural" | "title", number> = {
+export const MAX_LENGTH: Record<"customer" | "unit" | "customerPlural" | "unitPlural" | "title", number> = {
   customer: 32,
   unit: 32,
   customerPlural: 32,

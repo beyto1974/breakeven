@@ -38,6 +38,10 @@ Inspired by an internal profitability simulator, generalised: nouns, currency an
 | `solve` | Assumption to solve for: price, units, subscription, customers, growth, churn, variable, fixed, cac | price | |
 | `title` | Report heading | follows `lang`: Break-even, Rentabiliteit, Rentabilité | 1 – 80 chars |
 
+The same contract is published as `/llms.txt` (for LLMs and other tools building
+a report link) and `/params.json` (the same data, machine-readable), generated
+from `src/query/settings.ts` by `scripts/build-llms.ts` on every build.
+
 Invalid or out-of-range values fall back to the default and are reported as warnings. Serialisation writes only non-default values.
 
 ## Development

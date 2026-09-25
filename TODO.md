@@ -37,3 +37,8 @@
 - [x] Domain solver: bisection on one assumption, for break-even, payback or margin goals
 - [x] Query params: goal, goalMonth, goalMargin, solve
 - [x] Panel in nl/fr/en with apply; e2e tests
+
+## Phase 6 — LLM accessibility
+- [x] `src/query/contract.ts`: query contract (fields, ranges, defaults, choices) as data, derived from `settings.ts`, tested
+- [x] `scripts/build-llms.ts` generates `public/llms.txt` and `public/params.json` before every `next build`, so an LLM can learn the URL contract in one fetch instead of reading source
+- [x] Review — none yet; small, additive, no runtime/UI change. Verified: unit tests, typecheck, and a full `BASE_PATH=/breakeven bun run build` with correct links in `out/llms.txt`.

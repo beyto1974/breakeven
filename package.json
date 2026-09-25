@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p ${PORT:-$(command -v freeport >/dev/null 2>&1 && freeport || echo 3000)}",
-    "build": "next build",
+    "build": "bun run scripts/build-llms.ts && next build",
     "test": "bun test src",
     "typecheck": "tsc --noEmit",
     "build:prototype": "bun run scripts/build-prototype.ts",
