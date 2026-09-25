@@ -57,6 +57,6 @@ describe("exportFileName", () => {
   });
 
   test("falls back to a generic name when the title has no usable characters", () => {
-    expect(exportFileName({ ...DEFAULT_SETTINGS, title: "€€€" }, "json")).toBe("rentability-24m.json");
+    expect(exportFileName({ ...DEFAULT_SETTINGS, title: "€€€" }, "json")).toBe("breakeven-24m.json");
   });
 });

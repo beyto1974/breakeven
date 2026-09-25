@@ -10,7 +10,7 @@ const lines: string[] = [];
 let handle: (request: Request) => Promise<Response>;
 
 beforeAll(async () => {
-  root = await mkdtemp(join(tmpdir(), "rentability-static-"));
+  root = await mkdtemp(join(tmpdir(), "breakeven-static-"));
   await writeFile(join(root, "index.html"), "<h1>report</h1>");
   await writeFile(join(root, "404.html"), "<h1>missing</h1>");
   await mkdir(join(root, "_next/static/chunks"), { recursive: true });

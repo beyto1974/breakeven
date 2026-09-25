@@ -5,7 +5,7 @@ const rows = (page: import("@playwright/test").Page) => page.getByTestId("monthl
 test.describe("report", () => {
   test("opens on the default report with the one-sentence answer", async ({ page }) => {
     await page.goto("/?lang=en");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Rentability");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Break-even");
     await expect(page.getByTestId("summary")).toHaveText(
       "32 customers cover €200 of fixed costs a month. The margin turns in month 8 and the early losses are repaid in month 15.",
     );
@@ -75,7 +75,7 @@ test.describe("report", () => {
   test("downloads the monthly table as CSV", async ({ page }) => {
     await page.goto("/?lang=en&months=12");
     const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "CSV" }).click()]);
-    expect(download.suggestedFilename()).toBe("rentability-12m.csv");
+    expect(download.suggestedFilename()).toBe("break-even-12m.csv");
   });
 });
 

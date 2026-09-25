@@ -28,7 +28,7 @@ describe("parseSettings", () => {
       unit: "unit",
       customerPlural: "",
       unitPlural: "",
-      title: "Rentability",
+      title: "Break-even",
       goal: "",
       goalMonth: 12,
       goalMargin: 10000,

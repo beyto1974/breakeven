@@ -1,4 +1,4 @@
-# Rentability
+# Break-even
 
 A generic, stateless profitability projection. Enter customers, usage, price and costs; the report answers:
 
@@ -34,7 +34,7 @@ Inspired by an internal profitability simulator, generalised: nouns, currency an
 | `goalMonth` | Month for a break-even or payback goal | 12 | 1 – 120 |
 | `goalMargin` | Total margin for a margin goal | 10000 | −1e9 – 1e9 |
 | `solve` | Assumption to solve for: price, units, subscription, customers, growth, churn, variable, fixed, cac | price | |
-| `title` | Report heading | follows `lang`: Rentability, Rentabiliteit, Rentabilité | 1 – 80 chars |
+| `title` | Report heading | follows `lang`: Break-even, Rentabiliteit, Rentabilité | 1 – 80 chars |
 
 Invalid or out-of-range values fall back to the default and are reported as warnings. Serialisation writes only non-default values.
 

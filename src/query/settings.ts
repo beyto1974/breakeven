@@ -109,7 +109,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   unit: "unit",
   customerPlural: "",
   unitPlural: "",
-  title: "Rentability",
+  title: "Break-even",
   goal: "",
   goalMonth: 12,
   goalMargin: 10_000,
@@ -118,7 +118,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 
 /** What follows the language: formatting, nouns and heading. */
 const LANGUAGE_DEFAULTS: Record<Lang, Pick<Settings, "locale" | "customer" | "unit" | "title">> = {
-  en: { locale: "en-IE", customer: "customer", unit: "unit", title: "Rentability" },
+  en: { locale: "en-IE", customer: "customer", unit: "unit", title: "Break-even" },
   nl: { locale: "nl-BE", customer: "klant", unit: "eenheid", title: "Rentabiliteit" },
   fr: { locale: "fr-BE", customer: "client", unit: "unité", title: "Rentabilité" },
 };

@@ -25,7 +25,7 @@ describe("createLogger", () => {
     logger.info("http.request", { status: 200 });
     expect(lines).toHaveLength(1);
     expect(lines[0]!.includes("\n")).toBe(false);
-    expect(parsed()[0]).toEqual({ time: "2026-09-25T10:00:00.000Z", level: "info", msg: "http.request", service: "rentability", status: 200 });
+    expect(parsed()[0]).toEqual({ time: "2026-09-25T10:00:00.000Z", level: "info", msg: "http.request", service: "breakeven", status: 200 });
   });
 
   test("drops lines below the configured level", () => {

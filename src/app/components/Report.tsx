@@ -102,7 +102,7 @@ export function Report() {
             <path d="M3 18 L9 12 L13 15 L21 6" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="21" cy="6" r="2.2" fill="var(--profit)" />
           </svg>
-          Rentability
+          Break-even
         </div>
         <div className="langs" role="group" aria-label={t.language}>
           {LANGS.map((lang) => (

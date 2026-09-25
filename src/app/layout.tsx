@@ -7,7 +7,7 @@ const body = Instrument_Sans({ subsets: ["latin"], weight: ["400", "500", "600"]
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jetbrains" });
 
 export const metadata: Metadata = {
-  title: "Rentability",
+  title: "Break-even",
   description: "How many customers pay the rent? A stateless profitability projection: every setting lives in the link.",
 };
 

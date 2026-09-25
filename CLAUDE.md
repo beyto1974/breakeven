@@ -19,7 +19,7 @@ Generic stateless rentability (profitability) projection report, generalised fro
 ## Commands
 - `bun test` — unit tests (TDD); `bun run test:e2e` — Playwright on the static build
 - `bun run dev` — dev server
-- `bun run preview` — serve `out/` locally; `BASE_PATH=/rentability bun run build` to test the Pages prefix
+- `bun run preview` — serve `out/` locally; `BASE_PATH=/breakeven bun run build` to test the Pages prefix
 
 ## Artefacts
 1. `docs/artifacts/spec.html` — design and query contract

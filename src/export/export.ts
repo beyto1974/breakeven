@@ -53,5 +53,5 @@ export function exportFileName(settings: Settings, extension: "csv" | "json"): s
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return `${slug || "rentability"}-${settings.months}m.${extension}`;
+  return `${slug || "breakeven"}-${settings.months}m.${extension}`;
 }

@@ -43,7 +43,7 @@ function serialise(fields: Fields): Fields {
   return out;
 }
 
-export function createLogger({ level, service = "rentability", write = (line) => process.stdout.write(line + "\n"), now = () => new Date() }: Options, bound: Fields = {}): Logger {
+export function createLogger({ level, service = "breakeven", write = (line) => process.stdout.write(line + "\n"), now = () => new Date() }: Options, bound: Fields = {}): Logger {
   const min = ORDER[level];
   const enabled = (l: Level) => ORDER[l] >= min;
   const log = (l: Level, msg: string, fields: Fields = {}) => {
