@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p ${PORT:?set PORT, e.g. PORT=$(freeport)}",
+    "dev": "next dev -p ${PORT:-$(command -v freeport >/dev/null 2>&1 && freeport || echo 3000)}",
     "build": "next build",
     "test": "bun test src",
     "typecheck": "tsc --noEmit",
     "build:prototype": "bun run scripts/build-prototype.ts",
-    "test:e2e": "E2E_PORT=${E2E_PORT:-$(freeport)} playwright test",
-    "preview": "PORT=${PORT:?set PORT, e.g. PORT=$(freeport)} bun src/server/main.ts"
+    "test:e2e": "E2E_PORT=${E2E_PORT:-$(command -v freeport >/dev/null 2>&1 && freeport || echo 4173)} playwright test",
+    "preview": "PORT=${PORT:-$(command -v freeport >/dev/null 2>&1 && freeport || echo 4173)} bun src/server/main.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

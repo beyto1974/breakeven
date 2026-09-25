@@ -11,15 +11,15 @@ Generic stateless rentability (profitability) projection report, generalised fro
 - Money is integer cents inside the domain. Prices include VAT; VAT is removed from revenue only.
 - Hosted on GitHub Pages: `next build` with `output: "export"` into `out/`, with `BASE_PATH` set by the Pages workflow. There is no Docker and no compose. `src/server` is only a local preview and e2e server. No login. State lives only in the query string. No database, no storage, no cookies, no API routes.
 - Logging and trace ids exist only in the preview server (`src/server`): one JSON object per line, level from `LOG_LEVEL`, `x-trace-id` on each response. GitHub Pages has no server-side logs.
-- Never hardcode a dev port: `PORT=$(freeport) bun run dev`. Report URLs as `http://localhost:<port>`.
+- Dev ports: the scripts use `freeport` when installed (shared dev box), else fixed defaults. Report URLs as `http://localhost:<port>`.
 - UI languages: en, nl, fr (`src/i18n/messages.ts`); every user-visible string goes through `messages(lang)`. Code, comments and Markdown stay English.
 - Every required form field has the `required` attribute. Numeric inputs use `inputmode="decimal"`.
 - Review after each phase; record the outcome in TODO.md.
 
 ## Commands
-- `bun test` — unit tests (TDD); `bun run test:e2e` — Playwright on the static build (port from freeport)
-- `PORT=$(freeport) bun run dev` — dev server
-- `PORT=$(freeport) bun run preview` — serve `out/` locally; `BASE_PATH=/rentability bun run build` to test the Pages prefix
+- `bun test` — unit tests (TDD); `bun run test:e2e` — Playwright on the static build
+- `bun run dev` — dev server
+- `bun run preview` — serve `out/` locally; `BASE_PATH=/rentability bun run build` to test the Pages prefix
 
 ## Artefacts
 1. `docs/artifacts/spec.html` — design and query contract

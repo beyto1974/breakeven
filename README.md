@@ -43,10 +43,15 @@ Invalid or out-of-range values fall back to the default and are reported as warn
 ```bash
 bun install
 bun test              # unit tests
-PORT=$(freeport) bun run dev   # then open http://localhost:<port>
+bun run dev           # http://localhost:3000 (or PORT=…)
 bun run build         # static export into out/
 bun run test:e2e      # Playwright against the static build
-PORT=$(freeport) bun run preview   # serve out/ locally
+```
+
+The scripts use the `freeport` helper to pick a free port when it is installed, and fall back to the ports above otherwise. `PORT` / `E2E_PORT` override both.
+
+```bash
+bun run preview       # serve out/ on http://localhost:4173
 ```
 
 ## Deployment: GitHub Pages

@@ -394,7 +394,7 @@ function bindChart(p: Projection, fmt: Formatter): void {
     cross.setAttribute("x1", String(cx));
     cross.setAttribute("x2", String(cx));
     cross.setAttribute("visibility", "visible");
-    const row = (k: string, v: string, color = "") => `<div class="r"><span>${k}</span><span${color ? ` style="color:${color}"` : ""}>${v}</span></div>`;
+    const row = (k: string, v: string) => `<div class="r"><span>${esc(k)}</span><span>${esc(v)}</span></div>`;
     tip.innerHTML = `<b>Month ${m.month}</b>${row(cap(plural(settings.customer)), fmt.integer(m.customers))}${row("Revenue", fmt.money(m.revenueCents))}${row("Costs", fmt.money(m.costCents))}${row("Margin", fmt.money(m.marginCents))}${row("Cumulative", fmt.money(m.cumulativeMarginCents))}`;
     tip.hidden = false;
     tip.style.left = `${(cx / W) * rect.width}px`;
