@@ -6,9 +6,9 @@
   --accent:#3A4BE0; --accent-ink:#FFFFFF; --accent-soft:#E6E9FC;
   --profit:#0E9F6E; --profit-soft:#DDF4EA; --loss:#D93F55; --loss-soft:#FBE3E7; --warn:#B7791F; --warn-soft:#FBF0DA;
   --cost-fixed:#E7A4AF; --cost-variable:#D93F55; --cost-acq:#9E2A3D;
-  --display:var(--font-bricolage),"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
-  --body:var(--font-instrument),"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
-  --mono:var(--font-jetbrains),"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --display:"Bricolage Grotesque Variable","Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --radius:14px;
 }
 @media (prefers-color-scheme: dark){
