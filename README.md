@@ -1,5 +1,7 @@
 # Break-even
 
+**Live:** https://beyto1974.github.io/breakeven/ · [Nederlands](https://beyto1974.github.io/breakeven/?lang=nl) · [Français](https://beyto1974.github.io/breakeven/?lang=fr)
+
 A generic, stateless profitability projection. Enter customers, usage, price and costs; the report answers:
 
 - **How many customers cover the fixed costs** (break-even threshold)
