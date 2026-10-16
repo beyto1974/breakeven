@@ -13,7 +13,7 @@
     "preview": "PORT=${PORT:-$(command -v freeport >/dev/null 2>&1 && freeport || echo 4173)} bun src/server/main.ts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/bun": "^1.4.2",
     "@types/react": "^19.3.0",
